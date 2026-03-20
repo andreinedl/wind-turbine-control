@@ -19,14 +19,14 @@ interface server_interface(input logic clk_i, rst_ni);
     // Driver-ul (Slave) generează răspunsurile către Master
     output prdata, pready, pslverr;
     // Driver-ul (Slave) monitorizează comenzile de la DUT
-    input  paddr, psel, penable, pwrite, pwdata, logs_o, valid_o; 
+    input  paddr, psel, penable, pwrite, pwdata, logs_o; 
   endclocking
 
   // Monitorul rămâne pasiv, observă tot traficul
   clocking monitor_cb @(posedge clk_i);
     default input #1 output #1;
     input paddr, psel, penable, pwrite, pwdata;
-    input prdata, pready, pslverr, logs_o, valid_o;
+    input prdata, pready, pslverr, logs_o;
   endclocking
 
   // Modport pentru Slave Driver
@@ -39,7 +39,7 @@ interface server_interface(input logic clk_i, rst_ni);
   modport DUT (
     output paddr, psel, penable, pwrite, pwdata, 
     input  prdata, pready, pslverr,              
-    output logs_o, valid_o,                      
+    output logs_o,                       
     input  clk_i, rst_ni
   );
 
@@ -69,7 +69,7 @@ property p_apb_pready;
     (penable) |-> (pready);
   endproperty
   assert_apb_pready: assert property (p_apb_pready) 
-                   else $error("APB_ERR: PREADY nu este 1 cand PENABLE este 1");
+                   else $error("APB_ERR: PREADY nu este 1 cand PENABLE este 1.");
 
   property p_apb_end;
     @(posedge clk_i) disable iff (!rst_ni)
