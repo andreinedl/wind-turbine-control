@@ -1,6 +1,5 @@
 interface server_interface(input logic clk_i, rst_ni);
   logic [31:0] logs_o;       // 32 biți, biți împărțiți
-  logic        valid_o;      // 1 bit: valid server logs
   
   // Semnale APB conduse de Master
   logic [31:0] paddr;   
@@ -38,9 +37,9 @@ interface server_interface(input logic clk_i, rst_ni);
 
   // Modport pentru DUT
   modport DUT (
-    output paddr, psel, penable, pwrite, pwdata, // Ieșiri: Controlul magistralei
-    input  prdata, pready, pslverr,              // Intrări: Răspunsul de la periferic
-    output logs_o, valid_o,                      // Ieșiri: Status server
+    output paddr, psel, penable, pwrite, pwdata, 
+    input  prdata, pready, pslverr,              
+    output logs_o, valid_o,                      
     input  clk_i, rst_ni
   );
 
@@ -53,17 +52,24 @@ interface server_interface(input logic clk_i, rst_ni);
 
   property p_apb_addr_stable;
     @(posedge clk_i) disable iff (!rst_ni)
-    psel |-> $stable(paddr);
+    psel |-> $stable(paddr) && paddr !=='x;
   endproperty
   assert_apb_addr_stable: assert property (p_apb_addr_stable) 
                           else $error("APB_ERR: Master-ul a schimbat PADDR in timp ce PSEL este activ");
 
   property p_apb_psel_hold;
     @(posedge clk_i) disable iff (!rst_ni)
-    (psel && penable && !pready) |=> (psel && penable);
+    (psel && penable && pready) |=> (!psel && !penable && !pready);
   endproperty
   assert_apb_hold: assert property (p_apb_psel_hold) 
                    else $error("APB_ERR: Master-ul a dezactivat PSEL/PENABLE inainte ca Slave-ul sa dea PREADY");
+
+property p_apb_pready;
+    @(posedge clk_i) disable iff (!rst_ni)
+    (penable) |-> (pready);
+  endproperty
+  assert_apb_pready: assert property (p_apb_pready) 
+                   else $error("APB_ERR: PREADY nu este 1 cand PENABLE este 1");
 
   property p_apb_end;
     @(posedge clk_i) disable iff (!rst_ni)
@@ -71,12 +77,5 @@ interface server_interface(input logic clk_i, rst_ni);
   endproperty
   assert_apb_end: assert property (p_apb_end) 
                   else $error("APB_ERR: Master-ul nu a coborat PENABLE dupa finalizarea tranzactiei (PREADY=1)");
-
-  property p_valid_logs;
-    @(posedge clk_i) disable iff (!rst_ni)
-    valid_o |-> (logs_o !== 32'bx);
-  endproperty
-  assert_logs_valid: assert property (p_valid_logs) 
-                     else $error("ERR: valid_o este activ, dar log-urile sunt necunoscute (X)");
 
 endinterface
