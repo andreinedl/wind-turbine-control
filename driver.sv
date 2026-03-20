@@ -5,9 +5,9 @@
 //gets the packet from generator and drive the transaction paket items into interface (interface is connected to DUT, so the items driven into interface signal will get driven in to DUT) 
 
 
-//se declara macro-ul DRIV_IF care va reprezenta interfata pe care driverul va trimite date DUT-ului
-`define DRIV_IF input_vif.DRIVER.driver_cb
-class driver;
+//se declara macro-ul INPUT_DRIV_IF care va reprezenta interfata pe care driverul va trimite date DUT-ului
+`define INPUT_DRIV_IF input_vif.DRIVER.driver_cb
+class input_driver;
   
   //used to count the number of transactions
   int no_transactions;
@@ -30,23 +30,23 @@ class driver;
   
   //Reset task, Reset the Interface signals to default/initial values
   task reset;
-    wait(input_vif.reset);
-    $display("--------- [DRIVER] Reset Started ---------");
-    `DRIV_IF.wind_dir_i <= 0;
-    `DRIV_IF.wind_speed_i <= 0;  
-    `DRIV_IF.temp_value_i <= 0;
-    `DRIV_IF.rpm_value_i <= 0;
-    `DRIV_IF.blade_angle_i <= 0;
-    `DRIV_IF.yaw_angle_i <= 0;
-    `DRIV_IF.error_feedback_i <= 0;
-    
     wait(!input_vif.reset);
+    $display("--------- [DRIVER] Reset Started ---------");
+    `INPUT_DRIV_IF.wind_dir_i <= 0;
+    `INPUT_DRIV_IF.wind_speed_i <= 0;  
+    `INPUT_DRIV_IF.temp_value_i <= 0;
+    `INPUT_DRIV_IF.rpm_value_i <= 0;
+    `INPUT_DRIV_IF.blade_angle_i <= 0;
+    `INPUT_DRIV_IF.yaw_angle_i <= 0;
+    `INPUT_DRIV_IF.error_feedback_i <= 0;
+    
+    wait(input_vif.reset);
     $display("--------- [DRIVER] Reset Ended ---------");
   endtask
   
   //drives the transaction items to interface signals
   task drive;
-      transaction trans;
+      input_transaction trans;
       
     //se asteapta ca modulul sa iasa din reset
      wait(mem_vif.reset);//linie valabila daca resetul este activ in 0
@@ -56,13 +56,13 @@ class driver;
       gen2driv.get(trans);
       $display("--------- [DRIVER-TRANSFER: %0d] ---------",no_transactions);
       @(posedge mem_vif.DRIVER.clk);
-        `DRIV_IF.wind_dir_i    <= trans.wind_dir;
-        `DRIV_IF.wind_speed_i  <= trans.wind_speed;
-        `DRIV_IF.temp_value_i  <= trans.temp_value
-        `DRIV_IF.rpm_value_i   <=  trans.rpm_value;
-        `DRIV_IF.blade_angle_i <= trans.blade_angle;
-        `DRIV_IF.yaw_angle_i   <= trans.yaw_angle;
-        `DRIV_IF.error_feedback_i <= trans.error_feedback;  
+        `INPUT_DRIV_IF.wind_dir_i    <= trans.wind_dir;
+        `INPUT_DRIV_IF.wind_speed_i  <= trans.wind_speed;
+        `INPUT_DRIV_IF.temp_value_i  <= trans.temp_value
+        `INPUT_DRIV_IF.rpm_value_i   <=  trans.rpm_value;
+        `INPUT_DRIV_IF.blade_angle_i <= trans.blade_angle;
+        `INPUT_DRIV_IF.yaw_angle_i   <= trans.yaw_angle;
+        `INPUT_DRIV_IF.error_feedback_i <= trans.error_feedback;  
       $display("-----------------------------------------");
       no_transactions++;
   endtask

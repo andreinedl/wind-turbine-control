@@ -4,8 +4,8 @@
 //monitorul urmareste traficul de pe interfetele DUT-ului, preia datele verificate si recompune tranzactiile (folosind obiecte ale clasei transaction); in implementarea de fata, datele preluate de pe interfete sunt trimise scoreboardului pentru verificare
 //Samples the interface signals, captures into transaction packet and send the packet to scoreboard.
 
-//in macro-ul MON_IF se retine blocul de semnale de unde monitorul extrage datele
-`define MON_IF input_vif.MONITOR.monitor_cb
+//in macro-ul INPUT_MON_IF se retine blocul de semnale de unde monitorul extrage datele
+`define INPUT_MON_IF input_vif.MONITOR.monitor_cb
 class input_monitor;
   
   //creating virtual interface handle
@@ -34,13 +34,13 @@ class input_monitor;
       //datele sunt citite pe frontul de ceas, informatiile preluate de pe semnale fiind retinute in oboiectul de tip tranzactie
       @(posedge input_vif.clk_i);
      
-        trans.wind_dir_i  = `MON_IF.wind_dir_i;
-        trans.wind_speed_i = `MON_IF.wind_speed_i;
-        trans.temp_value_i = `MON_IF.temp_value_i;
-        trans.rpm_value_i = `MON_IF.rpm_value_i;
-        trans.blade_angle_i = `MON_IF.blade_angle_i;
-        trans.yaw_angle_i = `MON_IF.yaw_angle_i;
-        trans.error_feedback_i = `MON_IF.error_feedback_i;
+        trans.wind_dir_i  = `INPUT_MON_IF.wind_dir_i;
+        trans.wind_speed_i = `INPUT_MON_IF.wind_speed_i;
+        trans.temp_value_i = `INPUT_MON_IF.temp_value_i;
+        trans.rpm_value_i = `INPUT_MON_IF.rpm_value_i;
+        trans.blade_angle_i = `INPUT_MON_IF.blade_angle_i;
+        trans.yaw_angle_i = `INPUT_MON_IF.yaw_angle_i;
+        trans.error_feedback_i = `INPUT_MON_IF.error_feedback_i;
         
       // dupa ce s-au retinut informatiile referitoare la o tranzactie, continutul obiectului trans se trimite catre scoreboard
         mon2scb.put(trans);
