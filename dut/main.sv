@@ -1,0 +1,65 @@
+module wind_turbine_control #(
+    parameter CLK_FREQ = 32'd50_000_000 // 50 MHz
+)
+(
+    input  logic        clk_i,
+    input  logic        rst_ni,
+
+    // Interfața Senzori (Intrări)
+    input  logic [9:0]  wind_speed_i,       // 0-60.0 m/s
+    input  logic [9:0]  wind_dir_i,  		// 0-359 deg (pentru nacelă)
+    input  logic [9:0]  yaw_angle_i,      	// Poziția actuală a nacelei
+    input  logic [8:0]  rpm_value_i,        // 0-35.0 RPM
+    input  logic [7:0]  blade_angle_i,    	// Unghiul actual al palelor
+    input  logic [6:0]  temp_value_i,       // Temperatura internă
+
+    // Interfața Actuatoare (Ieșiri)
+    output logic [9:0]  yaw_pos_o,      	// Comandă pentru nacelă				
+    output logic [7:0]  blade_pos_o,    	// Comandă pentru pale
+    output logic        heat_o,       		// Comandă rezistență
+    output logic        em_brake_o, 		// Frână mecanică
+    
+    // Status Sistem
+    output logic [3:0]  error_feedback    
+);
+
+    // --- 1. Instanțiere Control Nacelă (Yaw) ---
+    yaw_angle_control #(
+        .ONE_MINUTE_TICKS(CLK_FREQ * 60)	// 60 sec la 50MHz
+    ) yaw_ctrl (
+        .clk_i(clk_i),								       
+        .rst_ni(rst_ni),                                 
+        .wind_dir_i(wind_dir_i),              
+        .yaw_angle_i(yaw_angle_i),                 
+        .yaw_pos_o(yaw_pos_o),          
+        .error(error_feedback[1])                     
+    );
+
+    // --- 2. Instanțiere Control Pale (Pitch) ---
+    blade_pitch_control #(
+        .THIRTY_SEC_TICKS(CLK_FREQ * 30)	// 30 sec la 50MHz
+    ) pitch_ctrl (
+        .clk_i(clk_i),										
+        .rst_n(rst_n),                                      
+        .wind_speed_i(wind_speed_i),                        
+        .rpm_value_i(rpm_value_i),                          
+        .blade_angle_i(blade_angle_i),                      
+        .blade_pos_o(blade_pos_o),                  
+        .error(error_feedback[2]),                          
+        .em_break(error_feedback[0])                        
+    );                                                      
+
+    // --- 3. Instanțiere Control Încălzire (Heater) ---
+    heater_control #(
+        .FIVE_MIN_TICKS(CLK_FREQ * 300)		// 5 min la 50MHz
+    ) heat_ctrl (
+        .clk_i(clk_i),						
+        .rst_n(rst_n),
+        .temp_value_i(temp_value_i),
+        .heat_o(heat_o),
+        .error(error_feedback[3])
+    );
+
+
+
+endmodule

@@ -4,8 +4,8 @@
 //monitorul urmareste traficul de pe interfetele DUT-ului, preia datele verificate si recompune tranzactiile (folosind obiecte ale clasei transaction); in implementarea de fata, datele preluate de pe interfete sunt trimise scoreboardului pentru verificare
 //Samples the interface signals, captures into transaction packet and send the packet to scoreboard.
 
-//in macro-ul MON_IF se retine blocul de semnale de unde monitorul extrage datele
-`define MON_IF output_vif.MONITOR.monitor_cb
+//in macro-ul OUTPUT_MON_IF se retine blocul de semnale de unde monitorul extrage datele
+`define OUTPUT_MON_IF output_vif.MONITOR.monitor_cb
 class monitor;
   
   //creating virtual interface handle
@@ -33,6 +33,7 @@ class monitor;
 
       //datele sunt citite pe frontul de ceas, informatiile preluate de pe semnale fiind retinute in oboiectul de tip tranzactie
       @(posedge output_vif.MONITOR.clk);
+      
         output_trans.blade_pos_o = `MON_IF.blade_pos_o;
         output_trans.yaw_pos_o   = `MON_IF.yaw_pos_o;
         output_trans.heat_o      = `MON_IF.heat_o;
