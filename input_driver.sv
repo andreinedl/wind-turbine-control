@@ -85,6 +85,7 @@ class input_driver;
         end
       join_any
       disable fork;
+       reset();
     end
   endtask
         
