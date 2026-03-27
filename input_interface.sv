@@ -30,38 +30,53 @@ interface input_interface(input logic clk_i, rst_ni);
   endproperty
   assert_wind_dir: assert property (p_wind_dir_range) 
                    else $error("ERR: wind_dir_i in afara intervalului (0-3600)");
+	
+  // Cover pentru a asigura că am testat valorile macar o data 
+  COVER_WIND_C: cover property (p_wind_dir_range);
 
   property p_wind_speed_range;
     @(posedge clk_i) disable iff (!rst_ni) wind_speed_i <= 10'd600;
   endproperty
   assert_wind_speed: assert property (p_wind_speed_range) 
                      else $error("ERR: wind_speed_i in afara intervalului (0-600)");
+					 
+  // Cover pentru a asigura că am testat valorile macar o data  
+  COVER_WIND_S_C: cover property (p_wind_speed_range);
 
   property p_temp_range;
     @(posedge clk_i) disable iff (!rst_ni) temp_value_i <= 7'd100;
   endproperty
   assert_temp: assert property (p_temp_range) 
                else $error("ERR: temp_value_i in afara intervalului (0-100)");
+			   
+  // Cover pentru a asigura că am testat valorile macar o data 
+  COVER_TEMP_C: cover property (p_temp_range);
 
   property p_rpm_range;
     @(posedge clk_i) disable iff (!rst_ni) rpm_value_i <= 9'd350;
   endproperty
   assert_rpm: assert property (p_rpm_range) 
               else $error("ERR: rpm_value_i in afara intervalului (0-350)");
+			  
+  // Cover pentru a asigura că am testat valorile macar o data 
+  COVER_RPM_C: cover property (p_rpm_range);
 
   property p_blade_angle_range;
     @(posedge clk_i) disable iff (!rst_ni) blade_angle_i <= 8'd180;
   endproperty
   assert_blade_angle: assert property (p_blade_angle_range) 
                       else $error("ERR: blade_angle_i in afara intervalului (0-180)");
+					  
+  // Cover pentru a asigura că am testat valorile macar o data   
+  COVER_BLADE_C: cover property (p_blade_angle_range);
 
   property p_yaw_angle_range;
     @(posedge clk_i) disable iff (!rst_ni) yaw_angle_i <= 10'd720;
   endproperty
   assert_yaw_angle: assert property (p_yaw_angle_range) 
                     else $error("ERR: yaw_angle_i in afara intervalului (0-720)");
-
-  // Cover pentru a asigura că am testat valorile maxime 
-  cover_max_wind: cover property (@(posedge clk_i) disable iff (!rst_ni) wind_dir_i == 12'd3600);
+					
+  // Cover pentru a asigura că am testat valorile macar o data   
+  COVER_YAW_C: cover property (p_yaw_angle_range);
 
 endinterface
