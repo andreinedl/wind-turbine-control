@@ -5,12 +5,12 @@ module heater_control #(
     parameter logic [33:0] FIVE_MIN_TICKS = 34'd15_000_000_000
 )
 (
-    input  logic       clk_i,         // 50MHz
+    input  logic       clk_i,			// 50MHz
     input  logic       rst_ni,
-    input  logic [6:0] temp_value_i,  // 0=-25C, 100=75C (Offset 25)
+    input  logic [6:0] temp_value_i,	// 0=-25C, 100=75C (Offset 25)
     
-    output logic       heat_o,      // Comandă rezistență (1 = ON)
-    output logic       error      // Eroare dacă temp nu crește în 5 min
+    output logic       heat_o,			// Comandă rezistență (1 = ON)
+    output logic       error			// Eroare dacă temp nu crește în 5 min
 );
 
     logic [33:0] timer;

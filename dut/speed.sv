@@ -5,13 +5,13 @@ module blade_pitch_control #(
 )
 (
     input  logic        clk_i,                // Semnal de ceas (50MHz)
-    input  logic        rst_ni,              // Reset activ pe 0
+    input  logic        rst_ni,               // Reset activ pe 0
     input  logic [9:0]  wind_speed_i,         // 0-600 (0-60.0 m/s)
     input  logic [8:0]  rpm_value_i,          // 0-350 (0-35.0 RPM)
     input  logic [7:0]  blade_angle_i,        // Unghi actual 0-180 (0-90.0 deg)
     
-    output logic [7:0]  blade_pos_o, // Unghi țintă 0-180
-    output logic        error,              // Eroare timeout 30s
+    output logic [7:0]  blade_pos_o, 		  // Unghi țintă 0-180
+    output logic        error,                // Eroare timeout 30s
     output logic        em_break_o            // Frână de urgență (RPM > 350)
 );
 

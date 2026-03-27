@@ -5,12 +5,12 @@ module yaw_angle_control #(
   )
   
   (
-    input  logic        clk_i,           // Semnal de ceas
-    input  logic        rst_ni,         // Reset activ pe 0 (low)
-    input  logic [9:0]  wind_dir_i,    // Direcția vântului
-    input  logic [9:0]  yaw_angle_i,     // Poziția actuală a nacelei
-    output logic [9:0]  yaw_pos_o,  // Unghiul țintă
-    output logic        error          // Eroare dacă nu ajunge la țintă în 1 min
+    input  logic        clk_i,			// Semnal de ceas
+    input  logic        rst_ni,			// Reset activ pe 0 (low)
+    input  logic [9:0]  wind_dir_i,		// Direcția vântului
+    input  logic [9:0]  yaw_angle_i,	// Poziția actuală a nacelei
+    output logic [9:0]  yaw_pos_o,		// Unghiul țintă
+    output logic        error			// Eroare dacă nu ajunge la țintă în 1 min
 );
     
     logic [31:0] timer;
@@ -20,25 +20,34 @@ module yaw_angle_control #(
     assign yaw_pos_o = (wind_dir_i <= 10'd359) ? wind_dir_i : yaw_angle_i;
     assign is_moving = (yaw_pos_o != yaw_angle_i);
 
-    // 3. Procesul de numărare și generare eroare
+    // Procesul de numărare și generare eroare
     always_ff @(posedge clk_i or negedge rst_ni) begin
-        if (!rst_ni) begin
+        if (!rst_ni) 
             timer <= 32'd0;
+		else begin
+            if (is_moving) 
+				if (timer < ONE_MINUTE_TICKS) 
+					timer <= timer + 1;
+				else 
+					timer <= 32'd0;
+			else 
+				timer <= 32'd0;
+            end
+        end
+
+
+	always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni)
             error <= 1'b0;
-        end else begin
-            if (is_moving) begin
-                if (timer < ONE_MINUTE_TICKS) begin
-                    timer <= timer + 1;
-                    error <= 1'b0; // Încă are timp să se miște
-                end else begin
-                    error <= 1'b1; // A trecut minutul și nu a ajuns la destinație
-                end
-            end else begin
-                // Dacă a ajuns la unghiul corect, resetăm cronometrul și eroarea
-                timer <= 32'd0;
+		else begin
+            if (is_moving) 
+				if (timer < ONE_MINUTE_TICKS)
+					error <= 1'b0; 
+				else
+					error <= 1'b1; 
+			else 
                 error <= 1'b0;
             end
         end
-    end
 
 endmodule

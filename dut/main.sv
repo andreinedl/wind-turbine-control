@@ -1,6 +1,7 @@
 module wind_turbine_control #(
     parameter CLK_FREQ = 32'd50_000_000 // 50 MHz
 )
+
 (
     input  logic        clk_i,
     input  logic        rst_ni,
@@ -20,9 +21,19 @@ module wind_turbine_control #(
     output logic        em_brake_o, 		// Frână mecanică
     
     // Status Sistem
-    output logic [3:0]  error_feedback    
+    output logic [3:0]  error_feedback,    //0001-em. break   0010-yaw error   0100-blade error   1000-temperature error
+	
+	//Interfata APB (control)
+	input logic 		start_i,						//trigger pentru a incepe rafala de 3 tranzactii (asta o sa fie un semnal periodic care zice cand se trimit datele)
+	input logic 		pready_i,
+	
+	output logic 		paddr_o,						//paddr 1 bit in cazul nostru (trimitem la aceeasi adresa mereu,
+	output logic 		pwrite_o,						//ar fi useless sa fie o adresa de 32 biti)
+	output logic [31:0] pwdata_o,
+	output logic 		psel_o,
+	output logic		penable_o
 );
-
+	
     // --- 1. Instanțiere Control Nacelă (Yaw) ---
     yaw_angle_control #(
         .ONE_MINUTE_TICKS(CLK_FREQ * 60)	// 60 sec la 50MHz
@@ -60,6 +71,19 @@ module wind_turbine_control #(
         .error(error_feedback[3])
     );
 
+logic [95:0] info_i = {error_feedback, wind_speed_i, wind_dir_i, yaw_angle_i, rpm_value_i, blade_angle_i, temp_value_i, yaw_pos_o, blade_pos_o, heat_o, em_brake_o};
 
+ apb_master server_control_apb(
+	.clk_i(clk_i),
+	.rst_ni(rst_ni),
+	.start_i(start_i),						
+	.pready_i(pready_i),
+	.info_i(info_i),
+	.paddr_o(paddr_o),						
+	.pwrite_o(pwrite_o),						
+	.pwdata_o(pwdata_o),
+	.psel_o(psel_o),
+	.penable_o(penable_o)
+);
 
 endmodule
