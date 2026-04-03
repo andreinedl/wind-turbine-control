@@ -12,7 +12,7 @@ class output_coverage;
     blade_pos_cp: coverpoint trans_covered.blade_pos_o {
       bins low_wind     = {0};          // palele sunt maxim deschide - la vant cu viteza foarte redusa
       bins range[6]     = {[1:179]};    // 6 range uri egale intermediare
-      bins high_wind    = {180};        // palele sunt inchide - la vant cu viteza foarte mare
+      bins high_wind    = {180};        // palele sunt inchise - la vant cu viteza foarte mare
       bins out_of_range = {[181:$]};    // valori peste limita
     }
     
@@ -32,6 +32,8 @@ class output_coverage;
       bins disabled = {0};
       bins enabled  = {1};
     }
+
+    heat_x_brake: cross em_brake_cp, heat_cp;
     
   endgroup
   //se creaza grupul de coverage; ATENTIE! Fara functia de mai jos, grupul de coverage nu va putea esantiona niciodata date deoarece pana acum el a fost doar declarat, nu si creat
