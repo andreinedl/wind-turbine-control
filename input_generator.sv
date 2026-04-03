@@ -13,7 +13,7 @@ class input_generator;
   
   //declararea unui eveniment
   event ended;
-  
+   
   //constructor
   function new(mailbox gen2driv,event ended);
     //getting the mailbox handle from env, in order to share the transaction packet between the generator and driver, the same mailbox is shared between both.
