@@ -79,6 +79,7 @@ logic [95:0] info_i = {error_feedback, wind_speed_i, wind_dir_i, yaw_angle_i, rp
 	.start_i(start_i),						
 	.pready_i(pready_i),
 	.info_i(info_i),
+	
 	.paddr_o(paddr_o),						
 	.pwrite_o(pwrite_o),						
 	.pwdata_o(pwdata_o),
