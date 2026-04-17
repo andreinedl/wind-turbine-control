@@ -51,13 +51,13 @@ module wind_turbine_control #(
         .THIRTY_SEC_TICKS(CLK_FREQ * 30)	// 30 sec la 50MHz
     ) pitch_ctrl (
         .clk_i(clk_i),										
-        .rst_n(rst_n),                                      
+        .rst_ni(rst_n),                                      
         .wind_speed_i(wind_speed_i),                        
         .rpm_value_i(rpm_value_i),                          
         .blade_angle_i(blade_angle_i),                      
         .blade_pos_o(blade_pos_o),                  
         .error(error_feedback[2]),                          
-        .em_break(error_feedback[0])                        
+        .em_break_o(error_feedback[0])                        
     );                                                      
 
     // --- 3. Instanțiere Control Încălzire (Heater) ---
@@ -65,7 +65,7 @@ module wind_turbine_control #(
         .FIVE_MIN_TICKS(CLK_FREQ * 300)		// 5 min la 50MHz
     ) heat_ctrl (
         .clk_i(clk_i),						
-        .rst_n(rst_n),
+        .rst_ni(rst_n),
         .temp_value_i(temp_value_i),
         .heat_o(heat_o),
         .error(error_feedback[3])
@@ -73,7 +73,7 @@ module wind_turbine_control #(
 
 logic [95:0] info_i = {error_feedback, wind_speed_i, wind_dir_i, yaw_angle_i, rpm_value_i, blade_angle_i, temp_value_i, yaw_pos_o, blade_pos_o, heat_o, em_brake_o};
 
- apb_master server_control_apb(
+apb_master apb_master_tb(
 	.clk_i(clk_i),
 	.rst_ni(rst_ni),
 	.start_i(start_i),						
