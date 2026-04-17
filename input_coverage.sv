@@ -82,9 +82,7 @@ class input_coverage;
       bins error    = {[1:15]};
     }
 
-    cross wind_speed_cp, rpm_cp;
-    cross wind_speed_cp, blade_angle_cp;
-    cross wind_dir_cp, wind_speed_cp;
+  
 
   endgroup
 
