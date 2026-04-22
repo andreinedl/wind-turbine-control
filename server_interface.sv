@@ -2,7 +2,7 @@ interface server_interface(input logic clk_i, rst_ni);
   logic [31:0] logs_o;       // 32 biți, biți împărțiți
   
   // Semnale APB conduse de Master
-  logic [31:0] paddr;   
+  logic        paddr;
   logic        psel;    
   logic        penable; 
   logic        pwrite;  

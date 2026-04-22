@@ -1,5 +1,5 @@
 
-//--------TRANSACTII-------//
+//--------TRANZACTII-------//
 `include "input_transaction.sv"
 `include "output_transaction.sv"
 `include "server_transaction.sv"
@@ -102,10 +102,10 @@ class environment;
 	
 	task run;
 		pre_test();
-		$stop;
+		//$stop;
 		test();
 		post_test();
-		report();
+		//report();
 		$finish;
 	endtask
 	

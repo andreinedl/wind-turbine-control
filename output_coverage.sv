@@ -1,7 +1,7 @@
 //prin coverage, putem vedea ce situatii (de exemplu, ce tipuri de tranzactii) au fost generate in simulare; astfel putem masura stadiul la care am ajuns cu verificarea
 class output_coverage;
   
-  transaction trans_covered;
+  output_transaction output_trans_covered;
   
   //pentru a se putea vedea valoarea de coverage pentru fiecare element trebuie create mai multe grupuri de coverage, sau trebuie creata o functie de afisare proprie
   covergroup transaction_cg;
@@ -9,28 +9,37 @@ class output_coverage;
     option.per_instance = 1;
 
     // coverage point pentru pozitia palelor
-    blade_pos_cp: coverpoint trans_covered.blade_pos_o {
+    blade_pos_cp: coverpoint output_trans_covered.blade_pos_o {
       bins low_wind     = {0};          // palele sunt maxim deschide - la vant cu viteza foarte redusa
       bins range[6]     = {[1:179]};    // 6 range uri egale intermediare
       bins high_wind    = {180};        // palele sunt inchise - la vant cu viteza foarte mare
       bins out_of_range = {[181:$]};    // valori peste limita
     }
     
-    yaw_pos_cp: coverpoint trans_covered.yaw_pos_o {
+    yaw_pos_cp: coverpoint output_trans_covered.yaw_pos_o {
       bins zero_deg      = {0};         // nacela e la 0 grade
       bins range[6]      = {[1:719]};   // 6 range-uri egale intermediare
       bins full_rotation = {720};       // nacela e la 360 de grade
       bins out_of_range  = {[721:$]};   // valori peste limita
     }
 
-    heat_cp: coverpoint trans_covered.heat_o {
+    heat_cp: coverpoint output_trans_covered.heat_o {
       bins disabled = {0};
       bins enabled  = {1};
     }
 
-    em_brake_cp: coverpoint trans_covered.em_brake_o {
+    em_brake_cp: coverpoint output_trans_covered.em_brake_o {
       bins disabled = {0};
       bins enabled  = {1};
+    }
+
+    error_feedback_cp: coverpoint output_trans_covered.error_feedback_o {
+      bins no_error    = {4'b0000};
+      bins em_brake    = {4'b0001};
+      bins yaw_error   = {4'b0010};
+      bins blade_error = {4'b0100};
+      bins temp_error  = {4'b1000};
+      bins multi_error[] = {[4'b0011:4'b1111]};
     }
 
     heat_x_brake: cross em_brake_cp, heat_cp;
@@ -41,8 +50,8 @@ class output_coverage;
     transaction_cg = new();
   endfunction
   
-  task sample(transaction trans_covered); 
-  	this.trans_covered = trans_covered; 
+  task sample(output_transaction output_trans_covered); 
+  	this.output_trans_covered = output_trans_covered; 
   	transaction_cg.sample(); 
   endtask:sample   
   
@@ -51,6 +60,7 @@ class output_coverage;
     $display ("Yaw position coverage = %.2f%%", transaction_cg.yaw_pos_cp.get_coverage());
     $display ("Heat coverage = %.2f%%", transaction_cg.heat_cp.get_coverage());
     $display ("Emergency brake coverage = %.2f%%", transaction_cg.em_brake_cp.get_coverage());
+    $display ("Error feedback coverage = %.2f%%", transaction_cg.error_feedback_cp.get_coverage());
     $display ("Overall coverage = %.2f%%", transaction_cg.get_coverage());
   endfunction
   

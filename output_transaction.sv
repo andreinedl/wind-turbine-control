@@ -10,6 +10,7 @@ class output_transaction;
   rand bit [10-1:0] yaw_pos_o;  
   rand bit          heat_o;
   rand bit          em_brake_o;
+  rand bit [3:0]    error_feedback_o;
   
   //constrangerile reprezinta un tip de membru al claselor din SystemVerilog, pe langa atribute si metode
   //aceasta constrangere specifica faptul ca se executa fie o scriere, fie o citire
@@ -36,13 +37,14 @@ class output_transaction;
   
   //operator de copiere a unui obiect intr-un alt obiect (deep copy)
   function output_transaction do_copy();
-    output_transaction trans;
-    trans = new();
-    trans.blade_pos_o   = this.blade_pos_o;
-    trans.yaw_pos_o     = this.yaw_pos_o;
-    trans.heat_o        = this.heat_o;
-    trans.em_brake_o    = this.em_brake_o;
-    return trans;
+    output_transaction output_trans;
+    output_trans = new();
+    output_trans.blade_pos_o      = this.blade_pos_o;
+    output_trans.yaw_pos_o        = this.yaw_pos_o;
+    output_trans.heat_o           = this.heat_o;
+    output_trans.em_brake_o       = this.em_brake_o;
+    output_trans.error_feedback_o = this.error_feedback_o;
+    return output_trans;
   endfunction
 
 endclass

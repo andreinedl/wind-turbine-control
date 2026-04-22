@@ -6,7 +6,6 @@ interface output_interface(input logic clk_i, rst_ni);
   logic        em_brake_o;   // 1 bit: on/off frână urgență
   logic [3:0]  error_feedback_o; // 4 biți: erori rotire, nacelă, încălzire
 
-
   clocking monitor_cb @(posedge clk_i);
     default input #1 output #1;
     input blade_pos_o, yaw_pos_o, heat_o, em_brake_o, error_feedback_o;

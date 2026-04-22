@@ -40,7 +40,7 @@ class input_monitor;
         trans.rpm_value_i = `INPUT_MON_IF.rpm_value_i;
         trans.blade_angle_i = `INPUT_MON_IF.blade_angle_i;
         trans.yaw_angle_i = `INPUT_MON_IF.yaw_angle_i;
-        trans.error_feedback_i = `INPUT_MON_IF.error_feedback_i;
+        //trans.error_feedback_i = `INPUT_MON_IF.error_feedback_i;
         
       // dupa ce s-au retinut informatiile referitoare la o tranzactie, continutul obiectului trans se trimite catre scoreboard
         mon2scb.put(trans);
