@@ -1,1 +1,10 @@
-dut/work
+*.wlf
+*.qdb
+*.qpg
+*.qtl
+_info
+
+dut/work/
+
+dut/vsim.wlf
+dut/wave.do
