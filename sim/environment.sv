@@ -1,19 +1,19 @@
 
 //--------TRANZACTII-------//
-`include "input_transaction.sv"
-`include "output_transaction.sv"
-`include "server_transaction.sv"
+`include "../transactions/input_transaction.sv"
+`include "../transactions/output_transaction.sv"
+`include "../transactions/server_transaction.sv"
 
 //----------DRIVERS-----------//
-`include "input_driver.sv"
+`include "../drivers/input_driver.sv"
 
 //---------GENERATOARE---------//
-`include "input_generator.sv"
+`include "../generators/input_generator.sv"
 
 //---------MONITOARE-----------//
-`include "input_monitor.sv"
-`include "output_monitor.sv"
-`include "server_monitor.sv"
+`include "../monitors/input_monitor.sv"
+`include "../monitors/output_monitor.sv"
+`include "../monitors/server_monitor.sv"
 
 
 //--------COVERAGE-----------//
