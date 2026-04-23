@@ -1,7 +1,6 @@
 interface server_interface(input logic clk_i, rst_ni);
-  logic [31:0] logs_o;       // 32 biți, biți împărțiți
-  
-  // Semnale APB conduse de Master
+ 
+   // Semnale APB conduse de Master
   logic        paddr;
   logic        psel;    
   logic        penable; 
@@ -18,14 +17,14 @@ interface server_interface(input logic clk_i, rst_ni);
     // Driver-ul (Slave) generează răspunsurile către Master
     output pready, pslverr;
     // Driver-ul (Slave) monitorizează comenzile de la DUT
-    input  paddr, psel, penable, pwrite, pwdata, logs_o; 
+    input  paddr, psel, penable, pwrite, pwdata; 
   endclocking
 
   // Monitorul rămâne pasiv, observă tot traficul
   clocking monitor_cb @(posedge clk_i);
     default input #1 output #1;
     input paddr, psel, penable, pwrite, pwdata;
-    input pready, pslverr, logs_o;
+    input pready, pslverr;
   endclocking
 
   // Modport pentru Slave Driver
@@ -37,8 +36,7 @@ interface server_interface(input logic clk_i, rst_ni);
   // Modport pentru DUT
   modport DUT (
     output paddr, psel, penable, pwrite, pwdata, 
-    input  pready, pslverr,              
-    output logs_o,                       
+    input  pready, pslverr,                                    
     input  clk_i, rst_ni
   );
 
