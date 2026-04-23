@@ -28,7 +28,7 @@ class input_coverage;
 
       bins calm     = {[1:50]};
       bins moderate = {[51:300]};
-      bins strong   = {[301:599]};
+      bins strong_wind = {[301:599]};
 
     }
     
@@ -91,7 +91,7 @@ class input_coverage;
   task sample_function(input_transaction input_trans_covered); 
   	this.input_trans_covered = input_trans_covered; 
   	transaction_cg.sample(); 
-  endtask:sample   
+  endtask:sample_function   
   
   function void print_coverage();
 

@@ -13,6 +13,7 @@
 
 //-------------------------[TESTE]---------------------------------
 //`include "test1.sv"
+`include "../tests/first_test.sv"
 //----------------------------------------------------------------
 
 module testbench;
@@ -20,6 +21,7 @@ module testbench;
 //clock & reset
 bit clk;
 bit reset;
+bit start_i;
 
 //clock generation
 always #5 clk = ~clk;
@@ -34,6 +36,9 @@ end
 input_interface   input_intf (.clk_i(clk), .rst_ni(reset));
 output_interface  output_intf(.clk_i(clk), .rst_ni(reset));
 server_interface  server_intf(.clk_i(clk), .rst_ni(reset));
+
+// Instantiere program de test
+test t1(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
     .CLK_FREQ(32'd50_000_000) // 50 MHz

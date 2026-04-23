@@ -5,7 +5,7 @@
 //Samples the interface signals, captures into transaction packet and send the packet to scoreboard.
 
 //in macro-ul INPUT_MON_IF se retine blocul de semnale de unde monitorul extrage datele
-`define INPUT_MON_IF input_vif.MONITOR.monitor_cb
+`define INPUT_MON_IF input_vif.monitor_cb
 class input_monitor;
   
   //creating virtual interface handle

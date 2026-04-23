@@ -1,4 +1,4 @@
-`define SV_INF_MON svr_vif.MONITOR.monitor_cb
+`define SV_INF_MON svr_vif.monitor_cb
 
 class server_monitor;
 	

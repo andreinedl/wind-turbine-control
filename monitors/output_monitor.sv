@@ -5,7 +5,7 @@
 //Samples the interface signals, captures into transaction packet and send the packet to scoreboard.
 
 //in macro-ul OUTPUT_MON_IF se retine blocul de semnale de unde monitorul extrage datele
-`define OUTPUT_MON_IF output_vif.MONITOR.monitor_cb
+`define OUTPUT_MON_IF output_vif.monitor_cb
 class output_monitor;
   
   //creating virtual interface handle
@@ -32,7 +32,7 @@ class output_monitor;
       output_trans = new();
 
       //datele sunt citite pe frontul de ceas, informatiile preluate de pe semnale fiind retinute in oboiectul de tip tranzactie
-      @(posedge output_vif.MONITOR.clk_i);
+      @(posedge output_vif.clk_i);
       
         output_trans.blade_pos_o      = `OUTPUT_MON_IF.blade_pos_o;
         output_trans.yaw_pos_o        = `OUTPUT_MON_IF.yaw_pos_o;

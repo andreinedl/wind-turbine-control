@@ -5,7 +5,7 @@
 //gets the packet from generator and drive the transaction packet items into interface (interface is connected to DUT, so the items driven into interface signal will get driven in to DUT) 
 
 //se declara macro-ul INPUT_DRIV_IF care va reprezenta interfata pe care driverul va trimite date DUT-ului
-`define INPUT_DRIV_IF input_vif.DRIVER.driver_cb
+`define INPUT_DRIV_IF input_vif.driver_cb
 class input_driver;
   
   //used to count the number of transactions
@@ -53,7 +53,7 @@ class input_driver;
     //daca nu are date de la generator, driverul ramane cu executia la linia de mai jos, pana cand primeste respectivele date
       gen2driv.get(trans);
       $display("--------- [DRIVER-TRANSFER: %0d] ---------",no_transactions);
-      @(posedge input_vif.DRIVER.clk_i);
+      @(posedge input_vif.clk_i);
         `INPUT_DRIV_IF.wind_dir_i    <= trans.wind_dir_i;
         `INPUT_DRIV_IF.wind_speed_i  <= trans.wind_speed_i;
         `INPUT_DRIV_IF.temp_value_i  <= trans.temp_value_i;
