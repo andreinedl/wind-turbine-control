@@ -6,7 +6,7 @@
 
 //in macro-ul OUTPUT_MON_IF se retine blocul de semnale de unde monitorul extrage datele
 `define OUTPUT_MON_IF output_vif.MONITOR.monitor_cb
-class monitor;
+class output_monitor;
   
   //creating virtual interface handle
   virtual output_interface output_vif;
@@ -32,12 +32,13 @@ class monitor;
       output_trans = new();
 
       //datele sunt citite pe frontul de ceas, informatiile preluate de pe semnale fiind retinute in oboiectul de tip tranzactie
-      @(posedge output_vif.MONITOR.clk);
+      @(posedge output_vif.MONITOR.clk_i);
       
-        output_trans.blade_pos_o = `MON_IF.blade_pos_o;
-        output_trans.yaw_pos_o   = `MON_IF.yaw_pos_o;
-        output_trans.heat_o      = `MON_IF.heat_o;
-        output_trans.em_brake_o  = `MON_IF.em_brake_o;
+        output_trans.blade_pos_o      = `OUTPUT_MON_IF.blade_pos_o;
+        output_trans.yaw_pos_o        = `OUTPUT_MON_IF.yaw_pos_o;
+        output_trans.heat_o           = `OUTPUT_MON_IF.heat_o;
+        output_trans.em_brake_o       = `OUTPUT_MON_IF.em_brake_o;
+        output_trans.error_feedback_o = `OUTPUT_MON_IF.error_feedback_o;
 
       // dupa ce s-au retinut informatiile referitoare la o tranzactie, continutul obiectului trans se trimite catre scoreboard
         mon2scb.put(output_trans);

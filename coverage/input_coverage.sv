@@ -1,6 +1,6 @@
 class input_coverage;
   
-  input_transaction trans_covered;
+  input_transaction input_trans_covered;
   
   //pentru a se putea vedea valoarea de coverage pentru fiecare element trebuie create mai multe grupuri de coverage, sau trebuie creata o functie de afisare proprie
   covergroup transaction_cg;
@@ -10,20 +10,19 @@ class input_coverage;
     // adaugati adresele tuturor registrilor pe care ii aveti in DUT (sunt documentati in specificatie)
     
      // Directia vantului
-    wind_dir_cp: coverpoint trans_covered.wind_dir_i {
-      bins N  = {[3375:3600], [0:225]};   // 337.5°–360° + 0°–22.5°
-      bins NE = {[226:675]};             // 22.6°–67.5°
-      bins E  = {[676:1125]};            // 67.6°–112.5°
-      bins SE = {[1126:1575]};           // 112.6°–157.5°
-      bins S  = {[1576:2025]};           // 157.6°–202.5°
-      bins SV = {[2026:2475]};           // SV (Sud-Vest)
-      bins V  = {[2476:2925]};           // Vest
-      bins NV = {[2926:3375]};           // Nord-Vest
+    wind_dir_cp: coverpoint input_trans_covered.wind_dir_i {
+      bins N  = {[676:720], [0:45]};   // 338.0°–360.0° + 0.0°–22.5°
+      bins NE = {[46:135]};            // 23.0°–67.5°
+      bins E  = {[136:225]};           // 68.0°–112.5°
+      bins SE = {[226:315]};           // 113.0°–157.5°
+      bins S  = {[316:405]};           // 158.0°–202.5°
+      bins SV = {[406:495]};           // Sud-Vest
+      bins V  = {[496:585]};           // Vest
+      bins NV = {[586:675]};           // Nord-Vest
     }
 
-    
     //Viteza vantului
-    wind_speed_cp: coverpoint trans_covered.wind_speed_i {
+    wind_speed_cp: coverpoint input_trans_covered.wind_speed_i {
       bins lowest_value= {0};
       bins highest_value = {600};
 
@@ -34,7 +33,7 @@ class input_coverage;
     }
     
     //Temperatura
-   temp_cp: coverpoint trans_covered.temp_value_i {
+   temp_cp: coverpoint input_trans_covered.temp_value_i {
      bins coldest_value = {0};
      bins hottest_value = {100};
 
@@ -45,7 +44,7 @@ class input_coverage;
    }
 
   //RPM
-   rpm_cp: coverpoint trans_covered.rpm_value_i {
+   rpm_cp: coverpoint input_trans_covered.rpm_value_i {
 
      bins stopped = {0};
 
@@ -57,7 +56,7 @@ class input_coverage;
    }
     
     //Unghiul palelor
-    blade_angle_cp: coverpoint trans_covered.blade_angle_i {
+    blade_angle_cp: coverpoint input_trans_covered.blade_angle_i {
       
       bins lowest_value  = {0};
       bins highest_value = {180};
@@ -69,7 +68,7 @@ class input_coverage;
     }
 
    //Unghiul nacelei  
-    yaw_angle_cp: coverpoint trans_covered.yaw_angle_i {
+    yaw_angle_cp: coverpoint input_trans_covered.yaw_angle_i {
 
       bins low  = {[0:240]};
       bins mid  = {[241:480]};
@@ -77,12 +76,10 @@ class input_coverage;
     }
 
    //Feedback de eroare
-    error_cp: coverpoint trans_covered.error_feedback_i {
+   /* error_cp: coverpoint input_trans_covered.error_feedback_i {
       bins no_error = {0};
       bins error    = {[1:15]};
-    }
-
-  
+    }*/
 
   endgroup
 
@@ -91,8 +88,8 @@ class input_coverage;
     transaction_cg = new();
   endfunction
   
-  task sample_function(transaction trans_covered); 
-  	this.trans_covered = trans_covered; 
+  task sample_function(input_transaction input_trans_covered); 
+  	this.input_trans_covered = input_trans_covered; 
   	transaction_cg.sample(); 
   endtask:sample   
   
@@ -104,12 +101,12 @@ class input_coverage;
     $display("RPM coverage        = %.2f%%", transaction_cg.rpm_cp.get_coverage());
     $display("Blade coverage      = %.2f%%", transaction_cg.blade_angle_cp.get_coverage());
     $display("Yaw coverage        = %.2f%%", transaction_cg.yaw_angle_cp.get_coverage());
-    $display("Error coverage      = %.2f%%", transaction_cg.error_cp.get_coverage());
+    //$display("Error coverage      = %.2f%%", transaction_cg.error_cp.get_coverage());
 
     $display("TOTAL COVERAGE      = %.2f%%", transaction_cg.get_coverage());
 
   endfunction
   
   //o alta modalitate de a incheia declaratia unei clase este sa se scrie "endclass: numele_clasei"; acest lucru este util mai ales cand se declara mai multe clase in acelasi fisier; totusi, se recomanda ca fiecare fisier sa nu contina mai mult de o declaratie a unei clase
-endclass: coverage
+endclass: input_coverage
 

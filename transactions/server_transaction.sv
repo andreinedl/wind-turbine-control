@@ -11,7 +11,9 @@ class server_transaction;
 	function server_transaction do_copy();
 		server_transaction server_trans;
 		server_trans = new();
-		server_trans.data = this.data;		
+		server_trans.data = this.data;
+
+		return server_trans;		
 	endfunction
 	
 	

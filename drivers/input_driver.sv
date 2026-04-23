@@ -2,8 +2,7 @@
 //						www.verificationguide.com
 //-------------------------------------------------------------------------
 //driverul preia datele de la generator, la nivel abstract, si le trimite DUT-ului conform protocolului de comunicatie pe interfata respectiva
-//gets the packet from generator and drive the transaction paket items into interface (interface is connected to DUT, so the items driven into interface signal will get driven in to DUT) 
-
+//gets the packet from generator and drive the transaction packet items into interface (interface is connected to DUT, so the items driven into interface signal will get driven in to DUT) 
 
 //se declara macro-ul INPUT_DRIV_IF care va reprezenta interfata pe care driverul va trimite date DUT-ului
 `define INPUT_DRIV_IF input_vif.DRIVER.driver_cb
@@ -30,7 +29,7 @@ class input_driver;
   
   //Reset task, Reset the Interface signals to default/initial values
   task reset;
-    wait(!input_vif.reset);
+    wait(!input_vif.rst_ni);
     $display("--------- [DRIVER] Reset Started ---------");
     `INPUT_DRIV_IF.wind_dir_i <= 0;
     `INPUT_DRIV_IF.wind_speed_i <= 0;  
@@ -38,31 +37,30 @@ class input_driver;
     `INPUT_DRIV_IF.rpm_value_i <= 0;
     `INPUT_DRIV_IF.blade_angle_i <= 0;
     `INPUT_DRIV_IF.yaw_angle_i <= 0;
-    `INPUT_DRIV_IF.error_feedback_i <= 0;
+    //`INPUT_DRIV_IF.error_feedback_i <= 0;
     
-    wait(input_vif.reset);
+    wait(input_vif.rst_ni);
     $display("--------- [DRIVER] Reset Ended ---------");
   endtask
   
   //drives the transaction items to interface signals
   task drive;
-      input_transaction trans;
+    input_transaction trans;
       
     //se asteapta ca modulul sa iasa din reset
-     wait(mem_vif.reset);//linie valabila daca resetul este activ in 0
-    //wait(!mem_vif.reset);//linie valabila daca resetul este activ in 1
+    wait(input_vif.rst_ni); // reset activ in 0
     
     //daca nu are date de la generator, driverul ramane cu executia la linia de mai jos, pana cand primeste respectivele date
       gen2driv.get(trans);
       $display("--------- [DRIVER-TRANSFER: %0d] ---------",no_transactions);
-      @(posedge mem_vif.DRIVER.clk);
-        `INPUT_DRIV_IF.wind_dir_i    <= trans.wind_dir;
-        `INPUT_DRIV_IF.wind_speed_i  <= trans.wind_speed;
-        `INPUT_DRIV_IF.temp_value_i  <= trans.temp_value
-        `INPUT_DRIV_IF.rpm_value_i   <=  trans.rpm_value;
-        `INPUT_DRIV_IF.blade_angle_i <= trans.blade_angle;
-        `INPUT_DRIV_IF.yaw_angle_i   <= trans.yaw_angle;
-        `INPUT_DRIV_IF.error_feedback_i <= trans.error_feedback;  
+      @(posedge input_vif.DRIVER.clk_i);
+        `INPUT_DRIV_IF.wind_dir_i    <= trans.wind_dir_i;
+        `INPUT_DRIV_IF.wind_speed_i  <= trans.wind_speed_i;
+        `INPUT_DRIV_IF.temp_value_i  <= trans.temp_value_i;
+        `INPUT_DRIV_IF.rpm_value_i   <=  trans.rpm_value_i;
+        `INPUT_DRIV_IF.blade_angle_i <= trans.blade_angle_i;
+        `INPUT_DRIV_IF.yaw_angle_i   <= trans.yaw_angle_i;
+       // `INPUT_DRIV_IF.error_feedback_i <= trans.error_feedback_i;  
       $display("-----------------------------------------");
       no_transactions++;
   endtask
@@ -74,8 +72,7 @@ class input_driver;
       fork
         //Thread-1: Waiting for reset
         begin
-          wait(!input_vif.reset);//linie valabila daca resetul este activ in 0
-          //wait(mem_vif.reset);//linie valabila daca resetul este activ in 1
+          wait(!input_vif.rst_ni); //Reset activ in 0
         end
         //Thread-2: Calling drive task
         begin

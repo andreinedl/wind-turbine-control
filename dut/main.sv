@@ -8,7 +8,7 @@ module wind_turbine_control #(
 
     // Interfața Senzori (Intrări)
     input  logic [9:0]  wind_speed_i,       // 0-60.0 m/s
-    input  logic [9:0]  wind_dir_i,  		// 0-359 deg (pentru nacelă)
+    input  logic [9:0]  wind_dir_i,  		// 0-359 deg (pentru nacelă) (precizie 0,5 grade)
     input  logic [9:0]  yaw_angle_i,      	// Poziția actuală a nacelei
     input  logic [8:0]  rpm_value_i,        // 0-35.0 RPM
     input  logic [7:0]  blade_angle_i,    	// Unghiul actual al palelor
@@ -21,7 +21,7 @@ module wind_turbine_control #(
     output logic        em_brake_o, 		// Frână mecanică
     
     // Status Sistem
-    output logic [3:0]  error_feedback,    //0001-em. break   0010-yaw error   0100-blade error   1000-temperature error
+    output logic [3:0]  error_feedback_o,    //0001-em. break   0010-yaw error   0100-blade error   1000-temperature error
 	
 	//Interfata APB (control)
 	input logic 		start_i,						//trigger pentru a incepe rafala de 3 tranzactii (asta o sa fie un semnal periodic care zice cand se trimit datele)
@@ -34,7 +34,7 @@ module wind_turbine_control #(
 	output logic		penable_o
 );
 
-assign em_brake_o = error_feedback[0];
+assign em_brake_o = error_feedback_o[0];
 	
 // --- 1. Instanțiere Control Nacelă (Yaw) ---
 yaw_angle_control #(
@@ -45,7 +45,7 @@ yaw_angle_control #(
     .wind_dir_i(wind_dir_i),              
     .yaw_angle_i(yaw_angle_i),                 
     .yaw_pos_o(yaw_pos_o),          
-    .error(error_feedback[1])                     
+    .error(error_feedback_o[1])                     
 );
 // --- 2. Instanțiere Control Pale (Pitch) ---
 blade_pitch_control #(
@@ -57,8 +57,8 @@ blade_pitch_control #(
     .rpm_value_i(rpm_value_i),                          
     .blade_angle_i(blade_angle_i),                      
     .blade_pos_o(blade_pos_o),                  
-    .error(error_feedback[2]),                          
-    .em_break_o(error_feedback[0])                        
+    .error(error_feedback_o[2]),                          
+    .em_break_o(error_feedback_o[0])                        
 );                                                      
 // --- 3. Instanțiere Control Încălzire (Heater) ---
 heater_control #(
@@ -68,10 +68,10 @@ heater_control #(
     .rst_ni(rst_ni),
     .temp_value_i(temp_value_i),
     .heat_o(heat_o),
-    .error(error_feedback[3])
+    .error(error_feedback_o[3])
 );
 
-logic [95:0] info_i = {error_feedback, wind_speed_i, wind_dir_i, yaw_angle_i, rpm_value_i, blade_angle_i, temp_value_i, yaw_pos_o, blade_pos_o, heat_o, em_brake_o};
+logic [95:0] info_i = {error_feedback_o, wind_speed_i, wind_dir_i, yaw_angle_i, rpm_value_i, blade_angle_i, temp_value_i, yaw_pos_o, blade_pos_o, heat_o, em_brake_o};
 
 apb_master apb_master_tb(
 	.clk_i(clk_i),

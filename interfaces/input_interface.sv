@@ -1,6 +1,6 @@
 interface input_interface(input logic clk_i, rst_ni);
   // Semnale Senzori
-  logic [11:0] wind_dir_i;     // 12 biți: 0-3600 (0-360.0 grade)
+  logic [9:0]  wind_dir_i;     // 10 biți: 0-720 (0-360.0 grade)
   logic [9:0]  wind_speed_i;   // 10 biți: 0-600 (0-60 m/s)
   logic [6:0]  temp_value_i;   // 7 biți: 0=-25C la 100=75C
   logic [8:0]  rpm_value_i;    // 9 biți: 0-350 (0-35 RPM)
@@ -25,10 +25,10 @@ interface input_interface(input logic clk_i, rst_ni);
   modport MONITOR (clocking monitor_cb, input clk_i, rst_ni);
 
   property p_wind_dir_range;
-    @(posedge clk_i) disable iff (!rst_ni) wind_dir_i <= 12'd3600;
+    @(posedge clk_i) disable iff (!rst_ni) wind_dir_i <= 10'd720;
   endproperty
   assert_wind_dir: assert property (p_wind_dir_range) 
-                   else $error("ERR: wind_dir_i in afara intervalului (0-3600)");
+                   else $error("ERR: wind_dir_i in afara intervalului (0-720)");
 	
   // Cover pentru a asigura că am testat valorile macar o data 
   COVER_WIND_C: cover property (p_wind_dir_range);
