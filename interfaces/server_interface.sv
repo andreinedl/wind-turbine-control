@@ -100,7 +100,7 @@ P_APB_PENABLE_C: cover property (p_apb_penable);//ne asiguram ca proprietatea a 
 // pwdata trebuie sa ramana stabil pe durata fazei de access la o scriere	
    property p_apb_pwdata_stable;
 	@(posedge clk_i) disable iff (!rst_ni)
-    psel && pwrite |-> $stable(pwdata);
+    psel && penable && pwrite |-> $stable(pwdata);
   endproperty
   assert_apb_pwdata_stable: assert property (p_apb_pwdata_stable)
                             else $error("APB_ERR: Master-ul a modificat datele in timp ce tranzactia astepta PREADY.")	

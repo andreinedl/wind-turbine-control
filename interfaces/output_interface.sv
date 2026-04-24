@@ -13,6 +13,7 @@ interface output_interface(input logic clk_i, rst_ni);
 
   modport MONITOR (clocking monitor_cb, input clk_i, rst_ni);
 
+//
   property p_blade_out_range;
     @(posedge clk_i) disable iff (!rst_ni) blade_pos_o <= 8'd180;
   endproperty
@@ -31,8 +32,9 @@ interface output_interface(input logic clk_i, rst_ni);
   // Cover pentru a asigura că am testat valorile macar o data   
   COVER_YAW_C: cover property (p_yaw_out_range);
 
+// msb-ul semnalului error_feedback reprezinta de fapt semnalul em_brake_o
   property p_safety_heat_brake;
-    @(posedge clk_i) disable iff (!rst_ni) em_brake_o |-> !heat_o;
+    @(posedge clk_i) disable iff (!rst_ni) em_brake_o == error_feedback_o[3]==1;
   endproperty
   assert_safety: assert property (p_safety_heat_brake) 
                  else $warning("AVERTIZARE: Incalzirea este activa in timpul franei de urgenta!");
