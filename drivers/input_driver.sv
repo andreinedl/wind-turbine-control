@@ -37,7 +37,6 @@ class input_driver;
     `INPUT_DRIV_IF.rpm_value_i <= 0;
     `INPUT_DRIV_IF.blade_angle_i <= 0;
     `INPUT_DRIV_IF.yaw_angle_i <= 0;
-    //`INPUT_DRIV_IF.error_feedback_i <= 0;
     
     wait(input_vif.rst_ni);
     $display("--------- [DRIVER] Reset Ended ---------");
@@ -59,8 +58,7 @@ class input_driver;
         `INPUT_DRIV_IF.temp_value_i  <= trans.temp_value_i;
         `INPUT_DRIV_IF.rpm_value_i   <=  trans.rpm_value_i;
         `INPUT_DRIV_IF.blade_angle_i <= trans.blade_angle_i;
-        `INPUT_DRIV_IF.yaw_angle_i   <= trans.yaw_angle_i;
-       // `INPUT_DRIV_IF.error_feedback_i <= trans.error_feedback_i;  
+        `INPUT_DRIV_IF.yaw_angle_i   <= trans.yaw_angle_i; 
       $display("-----------------------------------------");
       no_transactions++;
   endtask
