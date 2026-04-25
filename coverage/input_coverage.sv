@@ -75,12 +75,6 @@ class input_coverage;
       bins high = {[481:720]};
     }
 
-   //Feedback de eroare
-   /* error_cp: coverpoint input_trans_covered.error_feedback_i {
-      bins no_error = {0};
-      bins error    = {[1:15]};
-    }*/
-
   endgroup
 
   //se creaza grupul de coverage; ATENTIE! Fara functia de mai jos, grupul de coverage nu va putea esantiona niciodata date deoarece pana acum el a fost doar declarat, nu si creat
@@ -101,9 +95,9 @@ class input_coverage;
     $display("RPM coverage        = %.2f%%", transaction_cg.rpm_cp.get_coverage());
     $display("Blade coverage      = %.2f%%", transaction_cg.blade_angle_cp.get_coverage());
     $display("Yaw coverage        = %.2f%%", transaction_cg.yaw_angle_cp.get_coverage());
-    //$display("Error coverage      = %.2f%%", transaction_cg.error_cp.get_coverage());
-
     $display("TOTAL COVERAGE      = %.2f%%", transaction_cg.get_coverage());
+
+
 
   endfunction
   

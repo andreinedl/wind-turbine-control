@@ -4,7 +4,6 @@ class input_transaction;
   rand bit [9:0]  wind_speed_i;
   rand bit [7:0]  temp_value_i;
   rand bit [8:0]  rpm_value_i ;
-  rand bit [3:0]  error_feedback_i;
   rand bit [7:0]  blade_angle_i;
   rand bit [9:0]  yaw_angle_i;
   
@@ -28,11 +27,6 @@ constraint rpm_c {
   rpm_value_i inside {[0:350]};
 }
 
-// feedback eroare (4 biti)
-constraint error_c {
-  error_feedback_i inside {[0:15]};
-}
-
 // unghi palete: 0 - 180 (0.5° rezolutie)
 constraint blade_angle_c {
   blade_angle_i inside {[0:180]};
@@ -51,7 +45,6 @@ constraint yaw_angle_c {
   $display("wind_speed_i     = %0d", wind_speed_i);
   $display("temp_value_i     = %0d", temp_value_i);
   $display("rpm_value_i      = %0d", rpm_value_i);
-  $display("error_feedback_i = %0d", error_feedback_i);
   $display("blade_angle_i    = %0d", blade_angle_i);
   $display("yaw_angle_i      = %0d", yaw_angle_i);
 
@@ -66,11 +59,8 @@ endfunction
     input_trans.wind_speed_i = this.wind_speed_i;
     input_trans.temp_value_i = this.temp_value_i;
     input_trans.rpm_value_i = this.rpm_value_i;
-    input_trans.error_feedback_i = this.error_feedback_i;
     input_trans.blade_angle_i = this.blade_angle_i;
     input_trans.yaw_angle_i = this.yaw_angle_i;
-    /*input_trans.clk_i = this.clk_i;
-    input_trans.rst_ni = this.rst_ni;*/ //CLOCK SI RESET NU TREBUIESC COPIATE
 
     return input_trans;
   endfunction

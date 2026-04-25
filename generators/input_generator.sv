@@ -35,4 +35,29 @@ class input_generator;
     -> ended; 
   endtask
   
+  task generate_single_transaction(  
+    bit [9:0] wind_dir    = 10'd120,
+    bit [9:0] wind_speed  = 10'd100,
+    bit [6:0] temp_value  = 7'd50,
+    bit [8:0] rpm_value   = 9'd100,
+    bit [7:0] blade_angle = 8'd90,
+    bit [9:0] yaw_angle   = 10'd120
+  );
+
+    if (!trans.randomize() with {
+      wind_dir_i    == wind_dir;
+      wind_speed_i  == wind_speed;
+      temp_value_i  == temp_value;
+      rpm_value_i   == rpm_value;
+      blade_angle_i == blade_angle;
+      yaw_angle_i   == yaw_angle;
+    }) begin
+      $fatal(1, "Gen:: trans randomization failed");
+    end
+
+    tr = trans.do_copy();
+    gen2driv.put(tr);
+
+  endtask
+
 endclass

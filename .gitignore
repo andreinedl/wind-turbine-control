@@ -10,3 +10,7 @@ dut/vsim.wlf
 dut/wave.do
 
 chat.rapidgpt
+
+scripts/.Xil
+*.txt
+*.log

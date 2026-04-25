@@ -23,6 +23,9 @@ class output_transaction;
     yaw_pos_o inside {[0:720]};   // 720 = 360 de grade 
   }
 
+  constraint error_c {
+    error_feedback_o inside {[0:15]};
+  }
   
   //aceasta functie este apelata dupa aplicarea functiei randomize() asupra obiectelor apartinand acestei clase
   //aceasta functie afiseaza valorile aleatorizate ale atributelor clasei
@@ -32,6 +35,7 @@ class output_transaction;
     $display("\t yaw_pos_o   = %0d", yaw_pos_o);
     $display("\t heat_o      = %0b", heat_o);
     $display("\t em_brake_o  = %0b", em_brake_o);
+    $display("\t error_feedback_o  = %0b", error_feedback_o);
     $display("----------------------------------------------");
   endfunction
   

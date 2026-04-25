@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 //-------------------------------------------------------------------------
 //				www.verificationguide.com   testbench.sv
 //-------------------------------------------------------------------------
@@ -13,7 +15,9 @@
 
 //-------------------------[TESTE]---------------------------------
 //`include "test1.sv"
-`include "../tests/first_test.sv"
+`include "../tests/em_brake_test.sv"
+`include "../tests/simple_test.sv"
+`include "../tests/random_test.sv"
 //----------------------------------------------------------------
 
 module testbench;
@@ -37,29 +41,30 @@ input_interface   input_intf (.clk_i(clk), .rst_ni(reset));
 output_interface  output_intf(.clk_i(clk), .rst_ni(reset));
 server_interface  server_intf(.clk_i(clk), .rst_ni(reset));
 
-// Instantiere program de test
-test t1(input_intf, output_intf, server_intf);
+//instantiere teste
+em_brake_test em_brake_test(input_intf, output_intf, server_intf);
+simple_test simple_test(input_intf, output_intf, server_intf);
+random_test random_test(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
-    .CLK_FREQ(32'd50_000_000) // 50 MHz
+    .CLK_FREQ(32'd50_000_000) // 50 MHz // de schimbat
 ) DUT (
     .clk_i(clk),
     .rst_ni(reset),
-
+//intrari
     .wind_speed_i  (input_intf.wind_speed_i),
     .wind_dir_i    (input_intf.wind_dir_i),
     .yaw_angle_i   (input_intf.yaw_angle_i),
     .rpm_value_i   (input_intf.rpm_value_i),
     .blade_angle_i (input_intf.blade_angle_i),
     .temp_value_i  (input_intf.temp_value_i),
-
+//iesiri
     .yaw_pos_o        (output_intf.yaw_pos_o),
     .blade_pos_o      (output_intf.blade_pos_o),
     .heat_o           (output_intf.heat_o),
     .em_brake_o       (output_intf.em_brake_o),
     .error_feedback_o (output_intf.error_feedback_o),
-
-    .start_i   (start_i),
+//APB
     .pready_i  (server_intf.pready),
     .paddr_o   (server_intf.paddr),
     .pwrite_o  (server_intf.pwrite),
