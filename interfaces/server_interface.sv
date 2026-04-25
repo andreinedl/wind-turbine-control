@@ -1,7 +1,6 @@
 interface server_interface(input logic clk_i, rst_ni);
-  logic [31:0] logs_o;       // 32 biți, biți împărțiți
-  
-  // Semnale APB conduse de Master
+ 
+   // Semnale APB conduse de Master
   logic        paddr;
   logic        psel;    
   logic        penable; 
@@ -18,14 +17,14 @@ interface server_interface(input logic clk_i, rst_ni);
     // Driver-ul (Slave) generează răspunsurile către Master
     output pready, pslverr;
     // Driver-ul (Slave) monitorizează comenzile de la DUT
-    input  paddr, psel, penable, pwrite, pwdata, logs_o; 
+    input  paddr, psel, penable, pwrite, pwdata; 
   endclocking
 
   // Monitorul rămâne pasiv, observă tot traficul
   clocking monitor_cb @(posedge clk_i);
     default input #1 output #1;
     input paddr, psel, penable, pwrite, pwdata;
-    input pready, pslverr, logs_o;
+    input pready, pslverr;
   endclocking
 
   // Modport pentru Slave Driver
@@ -37,8 +36,7 @@ interface server_interface(input logic clk_i, rst_ni);
   // Modport pentru DUT
   modport DUT (
     output paddr, psel, penable, pwrite, pwdata, 
-    input  pready, pslverr,              
-    output logs_o,                       
+    input  pready, pslverr,                                    
     input  clk_i, rst_ni
   );
 
@@ -59,7 +57,6 @@ P_APB_PENABLE_SETUP_C: cover property (p_apb_penable_setup);//ne asiguram ca pro
   assert_apb_addr_stable: assert property (p_apb_addr_stable) 
                           else $error("APB_ERR: Master-ul a schimbat PADDR in timp ce PSEL este activ");
 P_APB_ADDR_STABLE_C: cover property (p_apb_addr_stable);//ne asiguram ca proprietatea a fost accesata macar o data
-
 
 //dupa ce s-a terminat tranzactia, toate semnalele de protocol se duc in valoarea 0
   property p_apb_psel_hold;
@@ -86,7 +83,6 @@ P_APB_PREADY_C: cover property (p_apb_pready);//ne asiguram ca proprietatea a fo
   endproperty
   assert_apb_end: assert property (p_apb_end) 
                   else $error("APB_ERR: Master-ul nu a coborat PENABLE dupa finalizarea tranzactiei (PREADY=1)");
-				  
 P_APB_END_C: cover property (p_apb_end);//ne asiguram ca proprietatea a fost accesata macar o data
 
 // PENABLE trebuie sa fie 0 in primul ciclu al tranzactiei 
@@ -102,7 +98,7 @@ P_APB_PENABLE_C: cover property (p_apb_penable);//ne asiguram ca proprietatea a 
 // pwdata trebuie sa ramana stabil pe durata fazei de access la o scriere	
    property p_apb_pwdata_stable;
 	@(posedge clk_i) disable iff (!rst_ni)
-    psel && pwrite |-> $stable(pwdata);
+    psel && penable && pwrite |-> $stable(pwdata);
   endproperty
   assert_apb_pwdata_stable: assert property (p_apb_pwdata_stable)
                             else $error("APB_ERR: Master-ul a modificat datele in timp ce tranzactia astepta PREADY.");
