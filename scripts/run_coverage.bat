@@ -1,0 +1,1 @@
+C:\AMDDesignTools\2025.2\Vivado\bin\vivado.bat -mode batch -nolog -nojournal -source run_coverage.tcl
