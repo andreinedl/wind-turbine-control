@@ -19,7 +19,6 @@ wire heat;
 wire em_brake;
 wire [3:0] error_feedback;
 
-// Semnale APB (fără start, care acum e intern)
 wire paddr;
 wire pwrite;
 wire [31:0] pwdata;
@@ -28,7 +27,6 @@ wire penable;
 
 reg pready;
 
-// Folosim perioada ceasului (20ns = 50MHz, 10ns = 100MHz)
 localparam CLK_PERIOD_NS = 20;
 
 wind_turbine_control #(
@@ -53,9 +51,9 @@ wind_turbine_control #(
     .em_brake_o(em_brake),      
     
     // Status Sistem
-    .error_feedback_o(error_feedback), // Corectat din error_feedback în error_feedback_o
+    .error_feedback_o(error_feedback),
     
-    //Interfata APB (control) - START A DISPARUT DE AICI
+    //Interfata APB (control)
     .pready_i(pready),
     .paddr_o(paddr),                        
     .pwrite_o(pwrite),                      
@@ -66,7 +64,7 @@ wind_turbine_control #(
 
 initial begin
     clk = 0;
-    forever #(CLK_PERIOD_NS/2.0) clk = ~clk; // Ceas automat in functie de parametru
+    forever #(CLK_PERIOD_NS/2.0) clk = ~clk;
 end
 
 initial begin
@@ -110,7 +108,6 @@ initial begin
     #100;
     $display("\n========== SCENARIU 1: Vânt slab (fără mișcare) ==========");
     wind_speed = 10'd50;  // 5.0 m/s - sub limita minimă
-    // Când se execută linia de sus, DUT-ul va genera intern info_change și va începe transmisia APB
     #500;
     
     $display("\n========== SCENARIU 2: Vânt normal - direcție 0° ==========");
@@ -189,7 +186,7 @@ initial begin
         rpm_value = 9'd30 + (i * 10);
         blade_angle = 8'd50 + (i * 5);
         temp_value = 7'd50 + (i * 5);
-        #500; // Mărit puțin timpul să lăsăm APB-ul să termine transferurile
+        #500;
     end
     
     $display("\n========== SCENARIU 11: Condiții normale finale ==========");
