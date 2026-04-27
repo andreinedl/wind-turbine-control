@@ -1,5 +1,9 @@
 module wind_turbine_control #(
-    parameter CLK_PERIOD_NS = 20
+    parameter CLK_PERIOD_NS = 20,
+    parameter NS_PER_SEC = 1_000_000_000,
+    parameter YAW_COUNTER_SEC = 60,
+    parameter HEAT_COUNTER_SEC = 300,
+    parameter BLADE_COUNTER_SEC = 30
 ) (
     input        clk_i,
     input        rst_ni,
@@ -29,11 +33,6 @@ module wind_turbine_control #(
 	output logic 		psel_o,
 	output logic		penable_o
 );
-
-localparam NS_PER_SEC = 1_000_000_000;
-localparam YAW_COUNTER_SEC = 60;
-localparam HEAT_COUNTER_SEC = 300;
-localparam BLADE_COUNTER_SEC = 30;
 
 assign em_brake_o = error_feedback_o[0];
 
