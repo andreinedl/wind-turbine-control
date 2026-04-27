@@ -47,7 +47,7 @@ simple_test simple_test(input_intf, output_intf, server_intf);
 random_test random_test(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
-    .CLK_PERIOD_NS(CLK_PERIOD_NS),
+    .CLK_PERIOD_NS(20),
     .NS_PER_SEC(2)
 ) DUT (
     .clk_i(clk),
