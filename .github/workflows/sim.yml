@@ -17,7 +17,7 @@ jobs:
       - name: Simulation
         # Folosim imaginea ta de 2GB. --rm șterge containerul după folosire, -v aduce fișierele tale în el
         run: |
-          docker run --rm -v ${{ github.workspace }}:/project -w /project siliconbootcamp/xsim-synth-2024:latest bash -c "
+          docker run --rm -v ${{ github.workspace }}:/project -w /project siliconbootcamp/xsim-synth-2024:stable bash -c "
             
             xvlog -sv -i ./dut -i ./sim -i ./interfaces -i ./drivers -i ./generators -i ./monitors -i ./tests -i ./transactions sim/testbench.sv
             
