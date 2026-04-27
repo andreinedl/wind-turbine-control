@@ -26,7 +26,7 @@ jobs:
               ./dut/*.sv \
               sim/testbench.sv
             
-            xelab -debug typical testbench -snapshot tb_snap
+            xelab -debug typical testbench -snapshot tb_snap --timescale 1ns/1ps
             
             xsim tb_snap -R
             
