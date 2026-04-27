@@ -30,7 +30,7 @@ jobs:
             
             xsim tb_snap -R
             
-            xcrg -dir ./xsim.covdb -report_dir ./coverage_html_report -format html
+            xcrg -cov_db_dir ./ -report_dir ./coverage_html_report -report_format html
           '
 
       - name: Upload
