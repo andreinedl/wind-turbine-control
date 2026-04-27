@@ -1,42 +1,38 @@
-name: Generare coverage
+name: SystemVerilog Coverage CI
 
 on:
   push:
     branches: [main, github-actions]
   pull_request:
     branches: [main]
-  
+
 jobs:
-  simulate:
-    runs-on: ubuntu-24.04
+  simulate-and-coverage:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Setup Verilator
-        uses: veryl-lang/setup-verilator@v1
 
-      - name: Install lcov
+      - name: Simulation
+        # Folosim imaginea ta de 2GB. --rm șterge containerul după folosire, -v aduce fișierele tale în el
         run: |
-          sudo apt-get update
-          sudo apt-get install -y lcov
-      
-      - name: Run simulation
-        run: |
-          verilator -Wall --timing --cc --exe --build --coverage \
-            -I./dut -I./sim -I./interfaces -I./drivers -I./generators -I./monitors -I./tests -I./transactions \
-            sim/sim_verilator.cpp sim/testbench.sv
+          docker run --rm -v ${{ github.workspace }}:/project -w /project siliconbootcamp/xsim-synth-2024:latest bash -c "
             
-          ./obj_dir/Vtestbench
+            xvlog -sv -i ./dut -i ./sim -i ./interfaces -i ./drivers -i ./generators -i ./monitors -i ./tests -i ./transactions sim/testbench.sv
+            
+            
+            xelab -debug typical -coverage all -top work.testbench -snapshot tb_snap
+            
+            
+            xsim tb_snap -R
+            
+           
+            xcrg -dir ./xsim.covdb -report_dir ./coverage_html_report -format html
+          "
 
-      - name: Generate coverage report
-        run: |
-          verilator_coverage --write-info coverage.info coverage.dat
-          genhtml coverage.info --output-directory coverage_html_report
-
-      - name: Upload the coverage report
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: sv-coverage-report
-          path: coverage_html_report/
+          name: vivado-coverage-report
+          path: coverage_html_report
