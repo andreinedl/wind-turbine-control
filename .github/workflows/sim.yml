@@ -38,3 +38,4 @@ jobs:
         with:
           name: vivado-coverage-report
           path: coverage_html_report
+          include-hidden-files: true
