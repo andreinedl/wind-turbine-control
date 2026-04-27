@@ -21,7 +21,11 @@ jobs:
             
             source /root/settings64.sh
             
-            xvlog -sv -i ./dut -i ./sim -i ./interfaces -i ./drivers -i ./generators -i ./monitors -i ./tests -i ./transactions sim/testbench.sv
+            xvlog -sv -i ./dut -i ./sim -i ./interfaces -i ./drivers -i ./generators -i ./monitors -i ./tests -i ./transactions -i ./coverage \
+              ./interfaces/*.sv \
+              ./dut/*.sv \
+              ./coverage/*.sv \
+              sim/testbench.sv
             
             xelab -debug typical testbench -snapshot tb_snap
             
