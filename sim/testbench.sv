@@ -47,7 +47,8 @@ simple_test simple_test(input_intf, output_intf, server_intf);
 random_test random_test(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
-    .CLK_FREQ(32'd50_000_000) // 50 MHz // de schimbat
+    .CLK_PERIOD_NS(CLK_PERIOD_NS),
+    .NS_PER_SEC(2)
 ) DUT (
     .clk_i(clk),
     .rst_ni(reset),
