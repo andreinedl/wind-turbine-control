@@ -1,0 +1,42 @@
+name: Generare coverage
+
+on:
+  push:
+    branches: [main, github-actions]
+  pull_request:
+    branches: [main]
+  
+jobs:
+  simulate:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Setup Verilator
+        uses: veryl-lang/setup-verilator@v1
+
+      - name: Install lcov
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov
+      
+      - name: Run simulation
+        run: |
+          verilator -Wall --timing --cc --exe --build --coverage \
+            -I./dut -I./sim -I./interfaces -I./drivers -I./generators -I./monitors -I./tests -I./transactions \
+            sim/sim_verilator.cpp sim/testbench.sv
+            
+          ./obj_dir/Vtestbench
+
+      - name: Generate coverage report
+        run: |
+          verilator_coverage --write-info coverage.info coverage.dat
+          genhtml coverage.info --output-directory coverage_html_report
+
+      - name: Upload the coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sv-coverage-report
+          path: coverage_html_report/
