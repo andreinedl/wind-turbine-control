@@ -62,7 +62,7 @@ blade_pitch_control #(
 );                                                      
 // --- 3. Instanțiere Control Încălzire (Heater) ---
 heater_control #(
-    .FIVE_MIN_TICKS(CLK_FREQ * 300)		// 5 min la 50MHz
+    .HEAT_ERR_CNT_TSH(1000)		// 5 min la 50MHz
 ) heat_ctrl (
     .clk_i(clk_i),						
     .rst_ni(rst_ni),
