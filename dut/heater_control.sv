@@ -8,7 +8,7 @@ module heater_control #(
     input  logic            rst_ni,
     input  logic [7 - 1:0]  temp_value_i,	// 0=-25C, 100=75C (Offset 25)
     
-    output logic            heat_o,			// Comandă rezistență (1 = ON)
+    output logic            heat_o,			// Comanda rezistenta (1 = ON)
     output logic            error_o
 );
 

@@ -4,7 +4,7 @@ Proiect in care am construit un DUT pentru controlul unei turbine eoliene si un 
 
 ## DUT
 
-Top-level: [dut/main.sv](dut/main.sv)
+Top-level: [dut/wind_turbine_control.sv](dut/wind_turbine_control.sv)
 
 Intrari principale:
 - viteza vantului
@@ -22,7 +22,7 @@ Iesiri principale:
 - error feedback
 
 Module integrate:
-- [dut/main.sv](dut/main.sv)
+- [dut/wind_turbine_control.sv](dut/wind_turbine_control.sv)
 - [dut/yaw_angle_control.sv](dut/yaw_angle_control.sv)
 - [dut/blade_pitch_control.sv](dut/blade_pitch_control.sv)
 - [dut/heater_control.sv](dut/heater_control.sv)
