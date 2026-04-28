@@ -46,10 +46,13 @@ class illegal_values_trans extends input_transaction;
 	
 endclass
 
+environment env;
+illegal_values_trans illegal_trans;
+
 initial begin
 	$display("==== TEST VALORI INTERZISE ====");
 	env = new(input_intf, output_intf, server_intf);
-	illegal_values_trans illegal_trans = new();
+	illegal_trans = new();
 	
 	env.gen.trans = illegal_trans;
 	env.gen.repeat_count = 50;

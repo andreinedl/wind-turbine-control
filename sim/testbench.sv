@@ -18,6 +18,7 @@
 `include "../tests/em_brake_test.sv"
 `include "../tests/simple_test.sv"
 `include "../tests/random_test.sv"
+`include "../tests/limit_test.sv"
 //----------------------------------------------------------------
 
 module testbench;
@@ -36,7 +37,7 @@ initial begin
   #15 reset =1;
 end
 
-//creatinng instance of interface, in order to connect DUT and testcase
+//creating instance of interface, in order to connect DUT and testcase
 input_interface   input_intf (.clk_i(clk), .rst_ni(reset));
 output_interface  output_intf(.clk_i(clk), .rst_ni(reset));
 server_interface  server_intf(.clk_i(clk), .rst_ni(reset));
@@ -45,6 +46,7 @@ server_interface  server_intf(.clk_i(clk), .rst_ni(reset));
 em_brake_test em_brake_test(input_intf, output_intf, server_intf);
 simple_test simple_test(input_intf, output_intf, server_intf);
 random_test random_test(input_intf, output_intf, server_intf);
+limit_test limit_test(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
     .CLK_PERIOD_NS(20),
