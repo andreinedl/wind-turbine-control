@@ -1,9 +1,9 @@
 module wind_turbine_control #(
     parameter CLK_PERIOD_NS = 20,
     parameter NS_PER_SEC = 1_000_000_000,
-    parameter YAW_COUNTER_SEC = 60,
-    parameter HEAT_COUNTER_SEC = 300,
-    parameter BLADE_COUNTER_SEC = 30
+    parameter YAW_COUNTER_SEC = 60,		//Timpul maxim permis pentru rotirea nacelei
+    parameter HEAT_COUNTER_SEC = 300,	//Timpul maxim permis pentru atingerea temperaturii de prag
+    parameter BLADE_COUNTER_SEC = 30    //Timpul maxim permis pentru rotirea palelor
 ) (
     input        clk_i,
     input        rst_ni,
@@ -23,7 +23,7 @@ module wind_turbine_control #(
     output logic        em_brake_o, 		// Frână mecanică
     
     // Status Sistem
-    output logic [3:0]  error_feedback_o,    //0001-em. break   0010-yaw error   0100-blade error   1000-temperature error
+    output logic [3:0]  error_feedback_o,    //0001-temperature error   0010-yaw error   0100-blade error   1000-em. break
 	
 	//Interfata APB (control)
 	input        		pready_i,
@@ -34,7 +34,7 @@ module wind_turbine_control #(
 	output logic		penable_o
 );
 
-assign em_brake_o = error_feedback_o[0];
+assign em_brake_o = error_feedback_o[3];
 
 logic [95:0] info;
 logic [95:0] info_d;
@@ -71,7 +71,7 @@ blade_pitch_control #(
     .blade_angle_i(blade_angle_i),                      
     .blade_pos_o(blade_pos_o),                  
     .error_o(error_feedback_o[2]),                          
-    .em_break_o(error_feedback_o[0])                        
+    .em_break_o(error_feedback_o[3])                        
 );          
 
 // Modul incalzire auxiliara
@@ -82,7 +82,7 @@ heater_control #(
     .rst_ni(rst_ni),
     .temp_value_i(temp_value_i),
     .heat_o(heat_o),
-    .error_o(error_feedback_o[3])
+    .error_o(error_feedback_o[0])
 );
 
 apb_master apb_ctrl(
