@@ -5,6 +5,8 @@
 _info
 
 dut/work/
+work
+wave.do
 
 dut/vsim.wlf
 dut/wave.do
