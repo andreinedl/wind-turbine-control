@@ -1,4 +1,3 @@
-
 class input_transaction;
   rand bit [9:0]  wind_dir_i ;
   rand bit [9:0]  wind_speed_i;
