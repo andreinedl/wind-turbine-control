@@ -1,0 +1,41 @@
+name: SystemVerilog Coverage Generator
+
+on:
+  push:
+    branches: [main, github-actions]
+  pull_request:
+    branches: [main]
+
+jobs:
+  simulate-and-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Simulation
+        run: |
+          docker run --rm --entrypoint bash -v ${{ github.workspace }}:/project -w /project siliconbootcamp/xsim-synth-2024:stable -c '
+            set -e
+            
+            source /root/settings64.sh
+
+            xvlog -sv -i ./dut -i ./sim -i ./interfaces -i ./drivers -i ./generators -i ./monitors -i ./tests -i ./transactions -i ./coverage \
+              ./interfaces/*.sv \
+              ./dut/*.sv \
+              sim/testbench.sv
+            
+            xelab -debug typical testbench -snapshot tb_snap --timescale 1ns/1ps
+            
+            xsim tb_snap -R
+            
+            xcrg -cov_db_dir ./ -report_dir ./coverage_html_report -report_format html
+          '
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivado-coverage-report
+          path: coverage_html_report
+          include-hidden-files: true
