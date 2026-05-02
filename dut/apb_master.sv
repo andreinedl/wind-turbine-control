@@ -5,6 +5,7 @@ module apb_master (
 	
 	input logic 		start_i,						// trigger pentru a incepe rafala de 3 tranzactii
 	input logic 		pready_i,
+	input logic 		pslverr_i,
 	input logic  [95:0] info_i,
 	
 	output logic 		paddr_o,						
@@ -57,8 +58,12 @@ always_comb begin
 		SETUP: 	next_state = ACCESS;
 
 		ACCESS: begin
-			if(pready_i) next_state = PAUSE; else
-					     next_state = ACCESS;
+			if(pready_i) begin
+				if(pslverr_i) next_state = IDLE; 
+				else          next_state = PAUSE; 
+			end else begin
+				next_state = ACCESS;
+			end
 		end
 
 		PAUSE: begin
