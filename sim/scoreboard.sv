@@ -1,6 +1,9 @@
 class scoreboard;
     // praguri/limite
     localparam HEAT_EN_TEMP = 30; // 5 grade
+    localparam HEAT_DIS_TEMP = 35; // 10 grade
+
+    bit expected_heat_state = 0; // variabila de stare pentru temperatura
 
     // mailbox-uri
     mailbox input_mon2scb;
@@ -20,6 +23,16 @@ class scoreboard;
         output_cov = new();
     endfunction
 
+    function err(string signal_name, int expected_value, int actual_value);
+        $error("[SCB-FAIL] %s :: Expected = %d - Actual = %d", signal_name, expected_value, actual_value);
+        err_cnt++;
+    endfunction
+
+    function pass(string signal_name, int value);
+        $error("[SCB-PASS] %s :: Expected = %d - Actual = %d", signal_name, value, value);
+        pass_cnt++;
+    endfunction
+
     task main;
         input_transaction input_tr;
         output_transaction output_tr;
@@ -35,11 +48,20 @@ class scoreboard;
             
             // verificare incalzire auxiliara turbina
             if(input_tr.temp_value_i < HEAT_EN_TEMP) begin
-                if(output_tr.heat_o) pass_cnt++;
-                else begin
-                    err_cnt++;
-                    $display("Eroare: Incalzirea auxiliara este dezactivata chiar daca temperatura este sub prag.")
-                end
+                expected_heat_state = 1;
+                if(output_tr.heat_o) pass("heat_o", expected_heat_state);
+                else                 err("heat_o", expected_heat_state, output_tr.heat_o);
+
+            end else if(input_tr.temp_value_i > HEAT_DIS_TEMP) begin
+                expected_heat_state = 0;
+                if(!output_tr.heat_o) pass("heat_o", expected_heat_state);
+                else                  err("heat_o", expected_heat_state, output_tr.heat_o);
+
+            end else begin
+                if(output_tr.heat_o == expected_heat_state) 
+                    pass("heat_o", expected_heat_state);
+                else 
+                    err("heat_o", expected_heat_state, output_tr.heat_o);
             end
 
         end
