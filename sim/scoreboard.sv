@@ -90,16 +90,16 @@ class scoreboard;
 
             // verificam franarea de urgenta
             if(input_tr.rpm_value_i >= MAX_RPM) begin
-                if(output_tr.em_break_o) 
-                    pass("em_break_o", 1);
+                if(output_tr.em_brake_o) 
+                    pass("em_brake_o", 1);
                 else                          
-                    err("em_break_o", 1, output_tr.em_break_o);
+                    err("em_brake_o", 1, output_tr.em_brake_o);
             end 
             else begin
-                if(!output_tr.em_break_o) 
-                    pass("em_break_o", 0);
+                if(!output_tr.em_brake_o) 
+                    pass("em_brake_o", 0);
                 else                          
-                    err("em_break_o", 0, output_tr.em_break_o);
+                    err("em_brake_o", 0, output_tr.em_brake_o);
             end
 
             // verificare comanda pozitie pale
