@@ -21,7 +21,7 @@
 `include "../coverage/output_coverage.sv"
 
 //--------SCOREBOARD---------//
-
+`include "scoreboard.sv"
 
 class environment;
 
@@ -47,8 +47,8 @@ class environment;
 	mailbox			gen2driv;
 	
 	//Declararea scoreboard-ului
-	
-	event gen_ended;
+	scoreboard      scb;
+	event 			gen_ended;
 	
 	//Interfete virtuale
 	virtual input_interface input_vif;
@@ -78,8 +78,7 @@ class environment;
 		i_cov = new();
 		o_cov = new();
 		
-		//Scoreboard
-		//....
+		scb = new(i_mon2scb, o_mon2scb);
 	endfunction
 	
 	task pre_test();
@@ -95,7 +94,9 @@ class environment;
 		s_mon.main();
 		collect_input_coverage();
 		collect_output_coverage();
-		//scb.main();
+
+		//rulare scoreboard
+		scb.main();
 		join_any
 	endtask
 
@@ -103,7 +104,7 @@ class environment;
 		forever begin
 			input_transaction in_tr;
 			i_mon2scb.get(in_tr);
-			i_cov.sample_function(in_tr);
+			i_cov.sample(in_tr);
 		end
 	endtask
 
@@ -125,7 +126,7 @@ class environment;
 		while (i_mon2scb.num() > 0) begin
 			input_transaction in_tr;
 			i_mon2scb.get(in_tr);
-			i_cov.sample_function(in_tr);
+			i_cov.sample(in_tr);
 		end
 
 		while (o_mon2scb.num() > 0) begin
