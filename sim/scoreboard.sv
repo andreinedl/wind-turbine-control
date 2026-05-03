@@ -20,6 +20,7 @@ class scoreboard;
 
     shortint pass_cnt; // counter ce numara tranzactiile ce sunt corecte
     shortint err_cnt;  // counter ce numara tranzactiile ce sunt eronate
+    int no_transactions; // numarul total de tranzactii procesate
 
     function new(mailbox input_mon2scb, mailbox output_mon2scb);
         this.input_mon2scb = input_mon2scb;
@@ -46,6 +47,7 @@ class scoreboard;
             //se preiau datele de la monitoare
             input_mon2scb.get(input_tr);
             output_mon2scb.get(output_tr);
+            no_transactions++;
             
             // esantionam datele pentru coverage
             input_cov.sample(input_tr);

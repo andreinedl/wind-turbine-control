@@ -35,10 +35,6 @@ class environment;
 	input_monitor	i_mon;
 	output_monitor	o_mon;
 	server_monitor	s_mon;
-
-	//Declararea colectoarelor de coverage
-	input_coverage	i_cov;
-	output_coverage	o_cov;
 	
 	//Declararea mailbox-urilor
 	mailbox			i_mon2scb;
@@ -75,9 +71,7 @@ class environment;
 		i_mon = new(input_vif, i_mon2scb);
 		o_mon = new(output_vif, o_mon2scb);
 		s_mon = new(svr_vif, s_mon2scb);
-		i_cov = new();
-		o_cov = new();
-		
+
 		scb = new(i_mon2scb, o_mon2scb);
 	endfunction
 	
@@ -91,54 +85,23 @@ class environment;
 		driver.main();
 		i_mon.main();
 		o_mon.main();
-		s_mon.main();
-		collect_input_coverage();
-		collect_output_coverage();
+		// s_mon.main();
 
 		//rulare scoreboard
 		scb.main();
 		join_any
 	endtask
-
-	task collect_input_coverage();
-		forever begin
-			input_transaction in_tr;
-			i_mon2scb.get(in_tr);
-			i_cov.sample(in_tr);
-		end
-	endtask
-
-	task collect_output_coverage();
-		forever begin
-			output_transaction out_tr;
-			o_mon2scb.get(out_tr);
-			o_cov.sample(out_tr);
-		end
-	endtask
 	
 	task post_test();
-	//	wait(gen_ended.triggered);
-	//	wait(gen.repeat_count == driver.no_transactions);
-		//wait(gen.repeat_count == scb.no_transactions);
+		wait(gen_ended.triggered);
+		wait(gen.repeat_count == driver.no_transactions);
+		wait(gen.repeat_count == scb.no_transactions);
 		#400;
-
-		// Goleste eventualele tranzactii ramase in mailbox-uri inainte de raport.
-		while (i_mon2scb.num() > 0) begin
-			input_transaction in_tr;
-			i_mon2scb.get(in_tr);
-			i_cov.sample(in_tr);
-		end
-
-		while (o_mon2scb.num() > 0) begin
-			output_transaction out_tr;
-			o_mon2scb.get(out_tr);
-			o_cov.sample(out_tr);
-		end
 	endtask
 	
 	function report();
-		i_cov.print_coverage();
-		o_cov.print_coverage();
+		scb.input_cov.print_coverage();
+		scb.output_cov.print_coverage();
 	endfunction
 	
 	task run;
