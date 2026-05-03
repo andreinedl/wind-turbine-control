@@ -28,12 +28,12 @@ class scoreboard;
         output_cov = new();
     endfunction
 
-    function err(string signal_name, int expected_value, int actual_value);
+    function void err(string signal_name, int expected_value, int actual_value);
         $error("[SCB-FAIL] %s :: Expected = %d - Actual = %d", signal_name, expected_value, actual_value);
         err_cnt++;
     endfunction
 
-    function pass(string signal_name, int value);
+    function void pass(string signal_name, int value);
         $display("[SCB-PASS] %s :: Expected = %d - Actual = %d", signal_name, value, value);
         pass_cnt++;
     endfunction
@@ -48,8 +48,8 @@ class scoreboard;
             output_mon2scb.get(output_tr);
             
             // esantionam datele pentru coverage
-            input_cov.sample_function(input_tr);
-            output_cov.sample_function(output_tr);
+            input_cov.sample(input_tr);
+            output_cov.sample(output_tr);
             
             // verificare incalzire auxiliara turbina
             if(input_tr.temp_value_i < HEAT_EN_TEMP) begin
