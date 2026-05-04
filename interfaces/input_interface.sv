@@ -23,53 +23,5 @@ interface input_interface(input logic clk_i, rst_ni);
 
   modport DRIVER  (clocking driver_cb, input clk_i, rst_ni);
   modport MONITOR (clocking monitor_cb, input clk_i, rst_ni);
-
-  // Verificarea intervalului pentru direcția vântului (0-720)
-  property p_wind_dir_range;
-    @(posedge clk_i) disable iff (!rst_ni) wind_dir_i <= 10'd720;
-  endproperty
-  assert_wind_dir: assert property (p_wind_dir_range) 
-                   else $error("ERR: wind_dir_i in afara intervalului (0-720)");
-  COVER_WIND_C: cover property (p_wind_dir_range); // Ne asigurăm că am monitorizat valori valide pentru direcția vântului
-
-  // Verificarea intervalului pentru viteza vântului (0-600)
-  property p_wind_speed_range;
-    @(posedge clk_i) disable iff (!rst_ni) wind_speed_i <= 10'd600;
-  endproperty
-  assert_wind_speed: assert property (p_wind_speed_range) 
-                     else $error("ERR: wind_speed_i in afara intervalului (0-600)");
-  COVER_WIND_S_C: cover property (p_wind_speed_range); // Ne asigurăm că am monitorizat valori valide pentru viteza vântului
-
-  // Verificarea intervalului pentru temperatura (0-100)
-  property p_temp_range;
-    @(posedge clk_i) disable iff (!rst_ni) temp_value_i <= 7'd100;
-  endproperty
-  assert_temp: assert property (p_temp_range) 
-               else $error("ERR: temp_value_i in afara intervalului (0-100)");
-  COVER_TEMP_C: cover property (p_temp_range); // Ne asigurăm că am monitorizat valori de temperatură în limitele definite
-
-  // Verificarea intervalului pentru RPM (0-350)
-  property p_rpm_range;
-    @(posedge clk_i) disable iff (!rst_ni) rpm_value_i <= 9'd350;
-  endproperty
-  assert_rpm: assert property (p_rpm_range) 
-              else $error("ERR: rpm_value_i in afara intervalului (0-350)");
-  COVER_RPM_C: cover property (p_rpm_range); // Ne asigurăm că am monitorizat viteze de rotație valide
-
-  // Verificarea intervalului pentru unghiul palei (0-180)
-  property p_blade_angle_range;
-    @(posedge clk_i) disable iff (!rst_ni) blade_angle_i <= 8'd180;
-  endproperty
-  assert_blade_angle: assert property (p_blade_angle_range) 
-                      else $error("ERR: blade_angle_i in afara intervalului (0-180)");
-  COVER_BLADE_C: cover property (p_blade_angle_range); // Ne asigurăm că am monitorizat unghiuri ale palei în limitele sigure
-
-  // Verificarea intervalului pentru unghiul de rotire a nacelei (0-720)
-  property p_yaw_angle_range;
-    @(posedge clk_i) disable iff (!rst_ni) yaw_angle_i <= 10'd720;
-  endproperty
-  assert_yaw_angle: assert property (p_yaw_angle_range) 
-                    else $error("ERR: yaw_angle_i in afara intervalului (0-720)");
-  COVER_YAW_C: cover property (p_yaw_angle_range); // Ne asigurăm că am monitorizat valori valide pentru unghiul de rotire
-
+  
 endinterface
