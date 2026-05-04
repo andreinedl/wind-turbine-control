@@ -14,7 +14,6 @@
 `include "environment.sv"
 
 //-------------------------[TESTE]---------------------------------
-//`include "test1.sv"
 `include "../tests/em_brake_test.sv"
 `include "../tests/simple_test.sv"
 `include "../tests/random_test.sv"
@@ -44,10 +43,10 @@ output_interface  output_intf(.clk_i(clk), .rst_ni(reset));
 server_interface  server_intf(.clk_i(clk), .rst_ni(reset));
 
 //instantiere teste
-//em_brake_test 	em_brake_test(input_intf, output_intf, server_intf);
-//simple_test 	simple_test(input_intf, output_intf, server_intf);
-//random_test		random_test(input_intf, output_intf, server_intf);
-//limit_test 		limit_test(input_intf, output_intf, server_intf);
+em_brake_test 	em_brake_test(input_intf, output_intf, server_intf);
+simple_test 	simple_test(input_intf, output_intf, server_intf);
+random_test		random_test(input_intf, output_intf, server_intf);
+limit_test 		limit_test(input_intf, output_intf, server_intf);
 low_temp_test	low_temp_test(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
