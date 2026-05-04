@@ -52,7 +52,7 @@ P_APB_PENABLE_SETUP_C: cover property (p_apb_penable_setup);//ne asiguram ca pro
 //paddr trebuie sa ramana stabila si valida pe toata durata tranzactiei
   property p_apb_addr_stable;
     @(posedge clk_i) disable iff (!rst_ni)
-    psel |-> $stable(paddr) && paddr !=='x && paddr !=='z; // !$unknown(paddr)
+    psel |-> $stable(paddr) && paddr !=='x && paddr !=='z; 
   endproperty
   assert_apb_addr_stable: assert property (p_apb_addr_stable) 
                           else $error("APB_ERR: Master-ul a schimbat PADDR in timp ce PSEL este activ");
@@ -91,8 +91,7 @@ P_APB_END_C: cover property (p_apb_end);//ne asiguram ca proprietatea a fost acc
 	$rose(psel) |-> penable ==0;
   endproperty
   assert_apb_penable: assert property (p_apb_penable)
-                      else $error("APB_ERR: PENABLE trebuie sa fie 0 cand PSEL tocmai a devenit 1.");
-				  
+                      else $error("APB_ERR: PENABLE trebuie sa fie 0 cand PSEL tocmai a devenit 1.")
 P_APB_PENABLE_C: cover property (p_apb_penable);//ne asiguram ca proprietatea a fost accesata macar o data
 	
 // pwdata trebuie sa ramana stabil pe durata fazei de access la o scriere	
@@ -101,8 +100,7 @@ P_APB_PENABLE_C: cover property (p_apb_penable);//ne asiguram ca proprietatea a 
     psel && penable && pwrite |-> $stable(pwdata);
   endproperty
   assert_apb_pwdata_stable: assert property (p_apb_pwdata_stable)
-                            else $error("APB_ERR: Master-ul a modificat datele in timp ce tranzactia astepta PREADY.");
-							
+                            else $error("APB_ERR: Master-ul a modificat datele in timp ce tranzactia astepta PREADY.")							
 P_APB_PWDATA_STABLE_C: cover property (p_apb_pwdata_stable);//ne asiguram ca proprietatea a fost accesata macar o data			 
 				  
 endinterface
