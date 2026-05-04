@@ -13,16 +13,16 @@ module blade_pitch_control #(
     
     output logic [7:0]  blade_pos_o, 		  // Unghi tinta 0-180
     output logic        error_o,              // Eroare timeout 30s
-    output logic        em_break_o            // Frana de urgenta (RPM > 350)
+    output logic        em_brake_o            // Frana de urgenta (RPM > 350)
 );
 
 logic [31:0] timer;
 logic        is_moving;
 
-assign em_break_o = (rpm_value_i >= MAX_RPM);			// Se activează daca RPM atinge sau depaseste pragul de 350 (35.0 RPM)
+assign em_brake_o = (rpm_value_i >= MAX_RPM);			// Se activează daca RPM atinge sau depaseste pragul de 350 (35.0 RPM)
 
 always_comb begin
-    if (em_break_o || (wind_speed_i > MAX_WIND))	blade_pos_o = 8'd180; else	// Daca e frana de urgenta sau vant peste valoare maxima permisa, unghiul merge la 90 grade (valoare 180)
+    if (em_brake_o || (wind_speed_i > MAX_WIND))	blade_pos_o = 8'd180; else	// Daca e frana de urgenta sau vant peste valoare maxima permisa, unghiul merge la 90 grade (valoare 180)
     if (wind_speed_i > ANGLE_INCREASE_TSH)			blade_pos_o = (wind_speed_i - ANGLE_INCREASE_TSH) >> 1; else // Logica proportionala simpla: pe masura ce vantul creste peste 12m/s (120), 
 													blade_pos_o = 8'd0;											// crestem unghiul pentru a limita puterea captata
 end

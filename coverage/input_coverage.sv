@@ -82,10 +82,10 @@ class input_coverage;
     transaction_cg = new();
   endfunction
   
-  task sample_function(input_transaction input_trans_covered); 
+  task sample(input_transaction input_trans_covered); 
   	this.input_trans_covered = input_trans_covered; 
   	transaction_cg.sample(); 
-  endtask:sample_function   
+  endtask:sample   
   
   function void print_coverage();
 

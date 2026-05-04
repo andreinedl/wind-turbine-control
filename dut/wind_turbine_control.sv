@@ -23,7 +23,7 @@ module wind_turbine_control #(
     output logic        em_brake_o, 		// Frână mecanică
     
     // Status Sistem
-    output logic [3:0]  error_feedback_o,    //0001-temperature error   0010-yaw error   0100-blade error   1000-em. break
+    output logic [3:0]  error_feedback_o,    //0001-temperature error   0010-yaw error   0100-blade error   1000-em. brake
 	
 	//Interfata APB (control)
 	input        		pready_i,
@@ -71,7 +71,7 @@ blade_pitch_control #(
     .blade_angle_i(blade_angle_i),                      
     .blade_pos_o(blade_pos_o),                  
     .error_o(error_feedback_o[2]),                          
-    .em_break_o(error_feedback_o[3])                        
+    .em_brake_o(error_feedback_o[3])                        
 );          
 
 // Modul incalzire auxiliara
