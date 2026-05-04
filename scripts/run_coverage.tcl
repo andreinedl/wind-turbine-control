@@ -1,6 +1,5 @@
 # Cale proiect - a se folosi "/" in loc de "\"
-open_project "path_proiect.xpr"
-
+open_project "D:/Univ AN 3/TEE/tee-vivado/tee-vivado.xpr"
 close_sim -quiet
 
 set_property -name {xsim.simulate.functional_coverage} -value {true} -objects [get_filesets sim_1]
