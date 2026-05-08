@@ -1,5 +1,5 @@
 module heater_control #(
-    parameter HEAT_ON_TSH = 30, // 5 grade Celsius
+    parameter HEAT_ON_TSH = 30,  // 5 grade Celsius
     parameter HEAT_OFF_TSH = 35, // 10 grade Celsius
     parameter HEAT_ERR_CNT_TSH = 1000
 )
@@ -21,12 +21,14 @@ logic                                   heat_tick;
 assign heat_err_cnt_tick = (heat_err_cnt == HEAT_ERR_CNT_TSH - 1);
 
 // Control incalzire
-always_ff @(posedge clk_i or negedge rst_ni) begin
+/*always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni)                        heat_o <= 1'b0; else // la reset dorim ca incalzirea auxiliara sa fie dezactivata
     if (error_o)                        heat_o <= 1'b0; else // vrem sa oprim incalzirea daca avem o eroare
     if (temp_value_i > HEAT_OFF_TSH)    heat_o <= 1'b0; else
     if (temp_value_i < HEAT_ON_TSH)     heat_o <= 1'b1;
-end
+end*/
+
+assign heat_o = (!(temp_value_i > HEAT_OFF_TSH) || (temp_value_i < HEAT_ON_TSH));
 
 //Detector de front pentru heat: detectam momentul in care s-a pornit incalzirea
 assign heat_tick = ~heat_d & heat_o;
