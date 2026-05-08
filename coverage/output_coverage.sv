@@ -13,14 +13,14 @@ class output_coverage;
       bins low_wind     = {0};          // palele sunt maxim deschide - la vant cu viteza foarte redusa
       bins range[6]     = {[1:179]};    // 6 range uri egale intermediare
       bins high_wind    = {180};        // palele sunt inchise - la vant cu viteza foarte mare
-      bins out_of_range = {[181:$]};    // valori peste limita
+      illegal_bins out_of_range = {[181:$]};    // valori peste limita
     }
     
     yaw_pos_cp: coverpoint output_trans_covered.yaw_pos_o {
       bins zero_deg      = {0};         // nacela e la 0 grade
       bins range[6]      = {[1:719]};   // 6 range-uri egale intermediare
       bins full_rotation = {720};       // nacela e la 360 de grade
-      bins out_of_range  = {[721:$]};   // valori peste limita
+      illegal_bins out_of_range  = default; //{[721:$]};   // valori peste limita
     }
 
     heat_cp: coverpoint output_trans_covered.heat_o {

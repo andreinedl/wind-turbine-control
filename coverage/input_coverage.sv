@@ -25,42 +25,33 @@ class input_coverage;
     wind_speed_cp: coverpoint input_trans_covered.wind_speed_i {
       bins lowest_value= {0};
       bins highest_value = {600};
-
       bins calm     = {[1:50]};
       bins moderate = {[51:300]};
       bins strong_wind = {[301:599]};
-
     }
     
     //Temperatura
    temp_cp: coverpoint input_trans_covered.temp_value_i {
      bins coldest_value = {0};
      bins hottest_value = {100};
-
      bins cold   = {[1:30]};
      bins normal = {[31:70]};
      bins warm   = {[71:99]};
-
    }
 
   //RPM
    rpm_cp: coverpoint input_trans_covered.rpm_value_i {
-
      bins stopped = {0};
-
      bins low     = {[1:80]};
      bins nominal = {[81:200]};
      bins high    = {[201:300]};
      bins extreme = {[301:350]};
-
    }
     
     //Unghiul palelor
     blade_angle_cp: coverpoint input_trans_covered.blade_angle_i {
-      
       bins lowest_value  = {0};
       bins highest_value = {180};
-
       bins fully_open        = {[1:45]};
       bins open              = {[46:90]};
       bins partially_closed  = {[91:135]};
@@ -69,7 +60,6 @@ class input_coverage;
 
    //Unghiul nacelei  
     yaw_angle_cp: coverpoint input_trans_covered.yaw_angle_i {
-
       bins low  = {[0:240]};
       bins mid  = {[241:480]};
       bins high = {[481:720]};
