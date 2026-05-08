@@ -89,8 +89,6 @@ class scoreboard;
                     else 
                         err("yaw_pos_o", yaw_last_pos, output_tr.yaw_pos_o);
                 end
-
-                $display("Yaw last pos input sensor err %d", yaw_last_pos);
             end 
             else begin
                 if(output_tr.yaw_pos_o == input_tr.wind_dir_i) 
@@ -99,7 +97,6 @@ class scoreboard;
                     err("yaw_pos_o", input_tr.wind_dir_i, output_tr.yaw_pos_o);
 
                 yaw_last_pos = output_tr.yaw_pos_o;
-                $display("Yaw last pos OK %d", yaw_last_pos);
             end
 
             // verificam franarea de urgenta
