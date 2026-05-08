@@ -8,7 +8,7 @@ class scoreboard;
     localparam WIND_ANGLE_INCREASE_TSH = 120;
 
     bit expected_heat_state = 0; // variabila de stare pentru temperatura
-    bit yaw_last_pos = 0;        // variabila de stare pentru pozitia nacelei
+    int yaw_last_pos = 0;        // variabila de stare pentru pozitia nacelei
 
     // mailbox-uri
     mailbox input_mon2scb;
@@ -77,17 +77,29 @@ class scoreboard;
 
             // verificare comanda nacela
             if(input_tr.wind_dir_i > YAW_MAX_POS) begin
-                if(output_tr.yaw_pos_o == yaw_last_pos) 
-                    pass("yaw_pos_o", yaw_last_pos);      
-                else 
-                    err("yaw_pos_o", yaw_last_pos, output_tr.yaw_pos_o);
+                if(input_tr.yaw_angle_i > YAW_MAX_POS) begin
+                    if(output_tr.yaw_pos_o == 0)
+                        pass("yaw_pos_o", 0);
+                    else
+                        err("yaw_pos_o", 0, output_tr.yaw_pos_o);
+                end
+                else begin
+                    if(output_tr.yaw_pos_o == yaw_last_pos) 
+                        pass("yaw_pos_o", yaw_last_pos);      
+                    else 
+                        err("yaw_pos_o", yaw_last_pos, output_tr.yaw_pos_o);
+                end
+
+                $display("Yaw last pos input sensor err %d", yaw_last_pos);
             end 
             else begin
-                yaw_last_pos = input_tr.wind_dir_i;
                 if(output_tr.yaw_pos_o == input_tr.wind_dir_i) 
                     pass("yaw_pos_o", input_tr.wind_dir_i);
                 else 
                     err("yaw_pos_o", input_tr.wind_dir_i, output_tr.yaw_pos_o);
+
+                yaw_last_pos = output_tr.yaw_pos_o;
+                $display("Yaw last pos OK %d", yaw_last_pos);
             end
 
             // verificam franarea de urgenta
