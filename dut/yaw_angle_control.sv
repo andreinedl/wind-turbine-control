@@ -16,7 +16,7 @@ logic                                 yaw_aligned;
 assign yaw_aligned      = (yaw_pos_o == yaw_angle_i);
 assign yaw_err_cnt_tick = (yaw_err_cnt == YAW_ERR_CNT_TSH - 1);
 
-assign yaw_pos_o        = (wind_dir_i < 720) ? wind_dir_i : yaw_angle_i; // protectie impotriva posibilelor erori ale senzorului de directie
+assign yaw_pos_o        = (wind_dir_i < 720) ? wind_dir_i : ((yaw_angle_i < 720) ? yaw_angle_i : '0); // protectie impotriva posibilelor erori ale senzorului de directie
 
 always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni)            yaw_err_cnt <= '0; else
