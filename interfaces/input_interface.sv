@@ -1,4 +1,8 @@
 interface input_interface(input logic clk_i, rst_ni);
+
+  event reset_assert;
+  event reset_deassert;
+
   // Semnale Senzori
   logic [9:0]  wind_dir_i;     // 10 biți: 0-720 (0-360.0 grade)
   logic [9:0]  wind_speed_i;   // 10 biți: 0-600 (0-60 m/s)

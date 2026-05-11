@@ -54,7 +54,7 @@ class environment;
 	//Constructor
 	function new(virtual input_interface input_vif	,
 				 virtual output_interface output_vif,
-				 virtual server_interface svr_vif	);
+				 virtual server_interface svr_vif);
 				 
 		this.input_vif 	= input_vif;
 		this.output_vif = output_vif;
@@ -72,7 +72,7 @@ class environment;
 		o_mon = new(output_vif, o_mon2scb);
 		s_mon = new(svr_vif, s_mon2scb);
 
-		scb = new(i_mon2scb, o_mon2scb);
+		scb = new(i_mon2scb, o_mon2scb, input_vif);
 	endfunction
 	
 	task pre_test();

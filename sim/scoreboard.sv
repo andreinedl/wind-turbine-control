@@ -14,6 +14,9 @@ class scoreboard;
     mailbox input_mon2scb;
     mailbox output_mon2scb;
     
+    // interfața virtuala pentru a putea asculta evenimentele de reset
+    virtual input_interface v_input_intf;
+
     // coverage
     input_coverage input_cov;
     output_coverage output_cov;
@@ -22,9 +25,10 @@ class scoreboard;
     shortint err_cnt;  // counter ce numara tranzactiile ce sunt eronate
     int no_transactions; // numarul total de tranzactii procesate
 
-    function new(mailbox input_mon2scb, mailbox output_mon2scb);
+    function new(mailbox input_mon2scb, mailbox output_mon2scb, virtual input_interface v_input_intf = null);
         this.input_mon2scb = input_mon2scb;
         this.output_mon2scb = output_mon2scb;
+        this.v_input_intf = v_input_intf;
         input_cov = new();
         output_cov = new();
     endfunction
@@ -39,112 +43,125 @@ class scoreboard;
         pass_cnt++;
     endfunction
 
+    task reset_scoreboard;
+        // resetam variabilele de stare la o valoare initiala
+        expected_heat_state = 0; 
+        yaw_last_pos = 0;        
+    endtask
+
     task main;
         input_transaction input_tr;
         output_transaction output_tr;
+        fork
+            forever begin
+                //se preiau datele de la monitoare
+                input_mon2scb.get(input_tr);
+                output_mon2scb.get(output_tr);
+                no_transactions++;
 
-        forever begin
-            //se preiau datele de la monitoare
-            input_mon2scb.get(input_tr);
-            output_mon2scb.get(output_tr);
-            no_transactions++;
-            
-            // esantionam datele pentru coverage
-            input_cov.sample(input_tr);
-            output_cov.sample(output_tr);
-            
-            // verificare incalzire auxiliara turbina
-            if(input_tr.temp_value_i < HEAT_EN_TEMP) begin
-                expected_heat_state = 1;
-                if(output_tr.heat_o) 
-                    pass("heat_o", expected_heat_state);
-                else                 
-                    err("heat_o", expected_heat_state, output_tr.heat_o);
-            end 
-            else if(input_tr.temp_value_i > HEAT_DIS_TEMP) begin
-                expected_heat_state = 0;
-                if(!output_tr.heat_o) 
-                    pass("heat_o", expected_heat_state);
-                else                  
-                    err("heat_o", expected_heat_state, output_tr.heat_o);
-            end 
-            else begin
-                if(output_tr.heat_o == expected_heat_state) 
-                    pass("heat_o", expected_heat_state);
-                else 
-                    err("heat_o", expected_heat_state, output_tr.heat_o);
-            end
+                // esantionam datele pentru coverage
+                input_cov.sample(input_tr);
+                output_cov.sample(output_tr);
 
-            // verificare comanda nacela
-            if(input_tr.wind_dir_i > YAW_MAX_POS) begin
-                if(input_tr.yaw_angle_i > YAW_MAX_POS) begin
-                    if(output_tr.yaw_pos_o == 0)
-                        pass("yaw_pos_o", 0);
+                // verificare incalzire auxiliara turbina
+                if(input_tr.temp_value_i < HEAT_EN_TEMP) begin
+                    expected_heat_state = 1;
+                    if(output_tr.heat_o) 
+                        pass("heat_o", expected_heat_state);
+                    else                 
+                        err("heat_o", expected_heat_state, output_tr.heat_o);
+                end 
+                else if(input_tr.temp_value_i > HEAT_DIS_TEMP) begin
+                    expected_heat_state = 0;
+                    if(!output_tr.heat_o) 
+                        pass("heat_o", expected_heat_state);
+                    else                  
+                        err("heat_o", expected_heat_state, output_tr.heat_o);
+                end 
+                else begin
+                    if(output_tr.heat_o == expected_heat_state) 
+                        pass("heat_o", expected_heat_state);
+                    else 
+                        err("heat_o", expected_heat_state, output_tr.heat_o);
+                end
+
+                // verificare comanda nacela
+                if(input_tr.wind_dir_i > YAW_MAX_POS) begin
+                    if(input_tr.yaw_angle_i > YAW_MAX_POS) begin
+                        if(output_tr.yaw_pos_o == 0)
+                            pass("yaw_pos_o", 0);
+                        else
+                            err("yaw_pos_o", 0, output_tr.yaw_pos_o);
+                    end
+                    else begin
+                        if(output_tr.yaw_pos_o == yaw_last_pos) 
+                            pass("yaw_pos_o", yaw_last_pos);      
+                        else 
+                            err("yaw_pos_o", yaw_last_pos, output_tr.yaw_pos_o);
+                    end
+                end 
+                else begin
+                    if(output_tr.yaw_pos_o == input_tr.wind_dir_i) 
+                        pass("yaw_pos_o", input_tr.wind_dir_i);
+                    else 
+                        err("yaw_pos_o", input_tr.wind_dir_i, output_tr.yaw_pos_o);
+
+                    yaw_last_pos = output_tr.yaw_pos_o;
+                end
+
+                // verificam franarea de urgenta
+                if(input_tr.rpm_value_i >= MAX_RPM) begin
+                    if(output_tr.em_brake_o) 
+                        pass("em_brake_o", 1);
+                    else                          
+                        err("em_brake_o", 1, output_tr.em_brake_o);
+                end 
+                else begin
+                    if(!output_tr.em_brake_o) 
+                        pass("em_brake_o", 0);
+                    else                          
+                        err("em_brake_o", 0, output_tr.em_brake_o);
+                end
+
+                // verificare comanda pozitie pale
+                if(input_tr.rpm_value_i >= MAX_RPM || input_tr.wind_speed_i > MAX_WIND) begin
+                    // verificam daca palele s-au dus la pozitia de 90 de grade
+                    if(output_tr.blade_pos_o == 180) 
+                        pass("blade_pos_o", 180);
+                    else                             
+                        err("blade_pos_o", 180, output_tr.blade_pos_o);
+                end 
+                else if(input_tr.wind_speed_i > WIND_ANGLE_INCREASE_TSH) begin
+                    int correct_value = (input_tr.wind_speed_i - WIND_ANGLE_INCREASE_TSH) / 2;
+                    //verificam pozitia palelor
+                    if(output_tr.blade_pos_o == correct_value)
+                        pass("blade_pos_o", output_tr.blade_pos_o);
                     else
-                        err("yaw_pos_o", 0, output_tr.yaw_pos_o);
+                        err("blade_pos_o", correct_value, output_tr.blade_pos_o);
                 end
                 else begin
-                    if(output_tr.yaw_pos_o == yaw_last_pos) 
-                        pass("yaw_pos_o", yaw_last_pos);      
-                    else 
-                        err("yaw_pos_o", yaw_last_pos, output_tr.yaw_pos_o);
+                    //verificam pozitia palelor
+                    if(output_tr.blade_pos_o == 0)
+                        pass("blade_pos_o", output_tr.blade_pos_o);
+                    else
+                        err("blade_pos_o", 0, output_tr.blade_pos_o);
                 end
-            end 
-            else begin
-                if(output_tr.yaw_pos_o == input_tr.wind_dir_i) 
-                    pass("yaw_pos_o", input_tr.wind_dir_i);
-                else 
-                    err("yaw_pos_o", input_tr.wind_dir_i, output_tr.yaw_pos_o);
 
-                yaw_last_pos = output_tr.yaw_pos_o;
+                // verificare semnal error_feedback
+                /*if(output_tr.em_brake_o) begin
+                    if(output_tr.error_feedback_o[3]) 
+                        pass("error_feedback_o[3]", 1);
+                    else
+                        err("error_feedback_o[3]", 0, output_tr.error_feedback_o);
+                end*/ 
             end
 
-            // verificam franarea de urgenta
-            if(input_tr.rpm_value_i >= MAX_RPM) begin
-                if(output_tr.em_brake_o) 
-                    pass("em_brake_o", 1);
-                else                          
-                    err("em_brake_o", 1, output_tr.em_brake_o);
-            end 
-            else begin
-                if(!output_tr.em_brake_o) 
-                    pass("em_brake_o", 0);
-                else                          
-                    err("em_brake_o", 0, output_tr.em_brake_o);
+            // in cazul resetului resetam scoreboard-ul
+            forever begin
+                @(v_input_intf.reset_assert);
+                reset_scoreboard();
             end
 
-            // verificare comanda pozitie pale
-            if(input_tr.rpm_value_i >= MAX_RPM || input_tr.wind_speed_i > MAX_WIND) begin
-                // verificam daca palele s-au dus la pozitia de 90 de grade
-                if(output_tr.blade_pos_o == 180) 
-                    pass("blade_pos_o", 180);
-                else                             
-                    err("blade_pos_o", 180, output_tr.blade_pos_o);
-            end 
-            else if(input_tr.wind_speed_i > WIND_ANGLE_INCREASE_TSH) begin
-                int correct_value = (input_tr.wind_speed_i - WIND_ANGLE_INCREASE_TSH) / 2;
-                //verificam pozitia palelor
-                if(output_tr.blade_pos_o == correct_value)
-                    pass("blade_pos_o", output_tr.blade_pos_o);
-                else
-                    err("blade_pos_o", correct_value, output_tr.blade_pos_o);
-            end
-            else begin
-                //verificam pozitia palelor
-                if(output_tr.blade_pos_o == 0)
-                    pass("blade_pos_o", output_tr.blade_pos_o);
-                else
-                    err("blade_pos_o", 0, output_tr.blade_pos_o);
-            end
-
-            // verificare semnal error_feedback
-            /*if(output_tr.em_brake_o) begin
-                if(output_tr.error_feedback_o[3]) 
-                    pass("error_feedback_o[3]", 1);
-                else
-                    err("error_feedback_o[3]", 0, output_tr.error_feedback_o);
-            end*/
-
-        end
+        join_none
     endtask
 endclass

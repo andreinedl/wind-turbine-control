@@ -19,6 +19,7 @@
 `include "../tests/random_test.sv"
 `include "../tests/limit_test.sv"
 `include "../tests/low_temp_test.sv"
+`include "../tests/rst_test.sv"
 //----------------------------------------------------------------
 
 module testbench;
@@ -35,6 +36,16 @@ always #5 clk = ~clk;
 initial begin
   reset = 0;
   #15 reset =1;
+
+  forever begin
+    @(input_intf.reset_assert); // se asteapta activarea reset-ului
+    $display("[Testbench] Reset asserted at %0t", $time);
+    reset = 0;
+
+    @(input_intf.reset_deassert); // se asteapta dezactivarea reset-ului
+    $display("[Testbench] Reset deasserted at %0t", $time);
+    reset = 1;
+  end
 end
 
 //creating instance of interface, in order to connect DUT and testcase
@@ -48,6 +59,7 @@ simple_test 	simple_test(input_intf, output_intf, server_intf);
 random_test		random_test(input_intf, output_intf, server_intf);
 limit_test 		limit_test(input_intf, output_intf, server_intf);
 low_temp_test	low_temp_test(input_intf, output_intf, server_intf);
+rst_test		rst_test(input_intf, output_intf, server_intf);
 
 wind_turbine_control #(
     .CLK_PERIOD_NS(20),
