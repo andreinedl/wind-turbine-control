@@ -21,6 +21,7 @@ class server_monitor;
 				trans 		= new();						//cand se detecteaza o tranzactie, se creeaza obiectul de tip server_transaction
 				trans.data 	= `SV_INF_MON.pwdata;			//si se copiaza in atributul "data" datele din semnalul "pwdata" de pe interfata
 				mon2scb.put(trans);
+				$display("%0t s-au transmis date pe mailbox-ul server-ului catre scoreboard", $time);
 			end
 			
 		end

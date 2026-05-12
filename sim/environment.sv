@@ -6,6 +6,7 @@
 
 //----------DRIVERS-----------//
 `include "../drivers/input_driver.sv"
+`include "../drivers/server_driver.sv"
 
 //---------GENERATOARE---------//
 `include "../generators/input_generator.sv"
@@ -29,7 +30,8 @@ class environment;
 	input_generator gen;
 	
 	//Declararea driver-ului
-	input_driver	driver;
+	input_driver	input_driver;
+	server_driver   server_driver;
 	
 	//Declararea monitoarelor
 	input_monitor	i_mon;
@@ -66,26 +68,32 @@ class environment;
 		s_mon2scb	= new();
 		
 		gen = new(gen2driv, gen_ended);
-		driver = new(input_vif, gen2driv);
+		input_driver = new(input_vif, gen2driv);
+		server_driver = new(svr_vif, gen2driv);
 		
 		i_mon = new(input_vif, i_mon2scb);
 		o_mon = new(output_vif, o_mon2scb);
 		s_mon = new(svr_vif, s_mon2scb);
 
-		scb = new(i_mon2scb, o_mon2scb, input_vif);
+		scb = new(i_mon2scb, o_mon2scb, s_mon2scb, input_vif);
 	endfunction
 	
 	task pre_test();
-		driver.reset();
+		fork
+			input_driver.reset();
+			server_driver.reset();
+		join
 	endtask
 	
 	task test();
 		fork
 		gen.main();
-		driver.main();
+		input_driver.main();
+		server_driver.main();
+		
 		i_mon.main();
 		o_mon.main();
-		// s_mon.main();
+		s_mon.main();
 
 		//rulare scoreboard
 		scb.main();
@@ -94,7 +102,7 @@ class environment;
 	
 	task post_test();
 		wait(gen_ended.triggered);
-		wait(gen.repeat_count == driver.no_transactions);
+		wait(gen.repeat_count == input_driver.no_transactions);
 		wait(gen.repeat_count == scb.no_transactions);
 		#400;
 	endtask

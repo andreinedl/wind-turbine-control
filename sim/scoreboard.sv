@@ -6,13 +6,19 @@ class scoreboard;
     localparam MAX_WIND	   = 250;
     localparam MAX_RPM     = 350; //35 RPM
     localparam WIND_ANGLE_INCREASE_TSH = 120;
+    
+    // variabile de stare
+    bit                 expected_heat_state = 0; // variabila de stare pentru temperatura
+    int                 yaw_last_pos = 0;        // variabila de stare pentru pozitia nacelei
+    int                 apb_trans_count = 0;     // variabila de stare pentru numarul de tranzactii efectuate pe apb
+    logic [95:0]        apb_trans_data = 0;      // date trimise pe APB
+    logic [95:0]        sensors_data;
 
-    bit expected_heat_state = 0; // variabila de stare pentru temperatura
-    int yaw_last_pos = 0;        // variabila de stare pentru pozitia nacelei
 
     // mailbox-uri
     mailbox input_mon2scb;
     mailbox output_mon2scb;
+    mailbox server_mon2scb;
     
     // interfața virtuala pentru a putea asculta evenimentele de reset
     virtual input_interface v_input_intf;
@@ -25,9 +31,10 @@ class scoreboard;
     shortint err_cnt;  // counter ce numara tranzactiile ce sunt eronate
     int no_transactions; // numarul total de tranzactii procesate
 
-    function new(mailbox input_mon2scb, mailbox output_mon2scb, virtual input_interface v_input_intf = null);
+    function new(mailbox input_mon2scb, mailbox output_mon2scb, mailbox server_mon2scb, virtual input_interface v_input_intf);
         this.input_mon2scb = input_mon2scb;
         this.output_mon2scb = output_mon2scb;
+        this.server_mon2scb = server_mon2scb;
         this.v_input_intf = v_input_intf;
         input_cov = new();
         output_cov = new();
@@ -47,11 +54,14 @@ class scoreboard;
         // resetam variabilele de stare la o valoare initiala
         expected_heat_state = 0; 
         yaw_last_pos = 0;        
+        apb_trans_count = 0;
+        apb_trans_data = 0;
     endtask
 
     task main;
         input_transaction input_tr;
         output_transaction output_tr;
+        server_transaction server_tr;
         fork
             forever begin
                 //se preiau datele de la monitoare
@@ -62,6 +72,21 @@ class scoreboard;
                 // esantionam datele pentru coverage
                 input_cov.sample(input_tr);
                 output_cov.sample(output_tr);
+
+                // stocare date pentru comparare cu cele trimise pe interfata APB
+                sensors_data = {
+                    output_tr.error_feedback_o, 
+                    input_tr.wind_speed_i, 
+                    input_tr.wind_dir_i, 
+                    input_tr.yaw_angle_i, 
+                    input_tr.rpm_value_i, 
+                    input_tr.blade_angle_i, 
+                    input_tr.temp_value_i, 
+                    output_tr.yaw_pos_o, 
+                    output_tr.blade_pos_o, 
+                    output_tr.heat_o, 
+                    output_tr.em_brake_o
+                };
 
                 // verificare incalzire auxiliara turbina
                 if(input_tr.temp_value_i < HEAT_EN_TEMP) begin
@@ -145,15 +170,29 @@ class scoreboard;
                         pass("blade_pos_o", output_tr.blade_pos_o);
                     else
                         err("blade_pos_o", 0, output_tr.blade_pos_o);
-                end
+                end        
+            end
 
-                // verificare semnal error_feedback
-                /*if(output_tr.em_brake_o) begin
-                    if(output_tr.error_feedback_o[3]) 
-                        pass("error_feedback_o[3]", 1);
-                    else
-                        err("error_feedback_o[3]", 0, output_tr.error_feedback_o);
-                end*/ 
+            // thread pentru scoreboard
+            forever begin
+                server_mon2scb.get(server_tr);                
+
+                apb_trans_data[apb_trans_count*32 +: 32] = server_tr.data;
+                apb_trans_count++;
+
+                if (apb_trans_count == 3) begin
+                    $display("[SCB-INFO] Data sent through APB interface: %h", apb_trans_data);
+                    if(apb_trans_data == sensors_data) begin
+                        // inlocuim functia pass 
+                        $display("[SCB-PASS] pwdata :: Expected = %h - Actual = %h", sensors_data, apb_trans_data);
+                        pass_cnt++;
+                    end else begin
+                        // inlocuim functia err
+                        $error("[SCB-FAIL] pwdata :: Expected = %h - Actual = %h", sensors_data, apb_trans_data);
+                        err_cnt++;
+                    end
+                    apb_trans_count = 0; // resetam counter-ul
+                end
             end
 
             // in cazul resetului resetam scoreboard-ul
