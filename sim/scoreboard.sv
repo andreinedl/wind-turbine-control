@@ -82,21 +82,20 @@ class scoreboard;
                 // stocare date pentru comparare cu cele trimise pe interfata APB
                 // daca verificarea de pe interfata server nu s-a terminat
                 // nu stocam noile date de la intrare si iesire in sensors_data
-                if(apb_trans_count == 0) {
-                    sensors_data = {
-                        output_tr.error_feedback_o, 
-                        input_tr.wind_speed_i, 
-                        input_tr.wind_dir_i, 
-                        input_tr.yaw_angle_i, 
-                        input_tr.rpm_value_i, 
-                        input_tr.blade_angle_i, 
-                        input_tr.temp_value_i, 
-                        output_tr.yaw_pos_o, 
-                        output_tr.blade_pos_o, 
-                        output_tr.heat_o, 
-                        output_tr.em_brake_o
-                    };
-                }
+                if(apb_trans_count == 0)    sensors_data = {
+                                                output_tr.error_feedback_o, 
+                                                input_tr.wind_speed_i, 
+                                                input_tr.wind_dir_i, 
+                                                input_tr.yaw_angle_i, 
+                                                input_tr.rpm_value_i, 
+                                                input_tr.blade_angle_i, 
+                                                input_tr.temp_value_i, 
+                                                output_tr.yaw_pos_o, 
+                                                output_tr.blade_pos_o, 
+                                                output_tr.heat_o, 
+                                                output_tr.em_brake_o
+                                            };
+                
 
                 // verificare incalzire auxiliara turbina
                 if(input_tr.temp_value_i < HEAT_EN_TEMP) begin // de ce ar trebui sa se activeze iesirea de caldura
