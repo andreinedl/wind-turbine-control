@@ -191,10 +191,10 @@ class scoreboard;
                 if (apb_trans_count == 3) begin
                     $display("[SCB-INFO] Data sent through APB interface: %h", apb_trans_data);
                     if(apb_trans_data == sensors_data) begin
-                        $display("[SCB-PASS] pwdata :: Expected = %h - Actual = %h", expected_apb_data, apb_trans_data);
+                        $display("[SCB-PASS] pwdata :: Expected = %h - Actual = %h", apb_trans_data, apb_trans_data);
                         pass_cnt++;
                     end else begin
-                        $error("[SCB-FAIL] pwdata :: Expected = %h - Actual = %h", expected_apb_data, apb_trans_data);
+                        $error("[SCB-FAIL] pwdata :: Expected = %h - Actual = %h", apb_trans_data, apb_trans_data);
                         err_cnt++;
                     end
                     apb_trans_count = 0; // resetam counter-ul
