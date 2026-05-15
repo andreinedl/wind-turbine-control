@@ -60,8 +60,6 @@ class scoreboard;
         yaw_last_pos = 0;        
         apb_trans_count = 0;
         apb_trans_data = 0;
-        prev_sensors_data = '0;
-        expected_apb_data = '0;
     endtask
 
     task main;
