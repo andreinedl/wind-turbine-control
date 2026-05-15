@@ -95,7 +95,7 @@ class scoreboard;
                         output_tr.blade_pos_o, 
                         output_tr.heat_o, 
                         output_tr.em_brake_o
-                    }
+                    };
                 }
 
                 // verificare incalzire auxiliara turbina
