@@ -11,8 +11,8 @@ class scoreboard;
     bit                 expected_heat_state = 0; // variabila de stare pentru temperatura
     int                 yaw_last_pos = 0;        // variabila de stare pentru pozitia nacelei
     int                 apb_trans_count = 0;     // variabila de stare pentru numarul de tranzactii efectuate pe apb
-    logic [95:0]        apb_trans_data = 0;      // date trimise pe APB
-    logic [95:0]        sensors_data;
+    logic [95:0]        apb_trans_data = '0;     // date trimise pe APB
+    logic [95:0]        sensors_data;            // datele curente de la senzori
 
 
     // mailbox-uri
@@ -40,11 +40,15 @@ class scoreboard;
         output_cov = new();
     endfunction
 
+    // printare mesaj de eroare pentru scoreboard
+    // functie ce inlocuieste afisarea cu $error si incrementarea la fiecare eroare
     function void err(string signal_name, int expected_value, int actual_value);
         $error("[SCB-FAIL] %s :: Expected = %d - Actual = %d", signal_name, expected_value, actual_value);
         err_cnt++;
     endfunction
 
+    // printare mesaj de succes pentru scoreboard
+    // functie ce inlocuieste afisarea cu $display si incrementarea la fiecare pass al scoreboard-ului
     function void pass(string signal_name, int value);
         $display("[SCB-PASS] %s :: Expected = %d - Actual = %d", signal_name, value, value);
         pass_cnt++;
@@ -56,6 +60,8 @@ class scoreboard;
         yaw_last_pos = 0;        
         apb_trans_count = 0;
         apb_trans_data = 0;
+        prev_sensors_data = '0;
+        expected_apb_data = '0;
     endtask
 
     task main;
@@ -74,22 +80,26 @@ class scoreboard;
                 output_cov.sample(output_tr);
 
                 // stocare date pentru comparare cu cele trimise pe interfata APB
-                sensors_data = {
-                    output_tr.error_feedback_o, 
-                    input_tr.wind_speed_i, 
-                    input_tr.wind_dir_i, 
-                    input_tr.yaw_angle_i, 
-                    input_tr.rpm_value_i, 
-                    input_tr.blade_angle_i, 
-                    input_tr.temp_value_i, 
-                    output_tr.yaw_pos_o, 
-                    output_tr.blade_pos_o, 
-                    output_tr.heat_o, 
-                    output_tr.em_brake_o
-                };
+                // daca verificarea de pe interfata server nu s-a terminat
+                // nu stocam noile date de la intrare si iesire in sensors_data
+                if(apb_trans_count == 0) {
+                    sensors_data = {
+                        output_tr.error_feedback_o, 
+                        input_tr.wind_speed_i, 
+                        input_tr.wind_dir_i, 
+                        input_tr.yaw_angle_i, 
+                        input_tr.rpm_value_i, 
+                        input_tr.blade_angle_i, 
+                        input_tr.temp_value_i, 
+                        output_tr.yaw_pos_o, 
+                        output_tr.blade_pos_o, 
+                        output_tr.heat_o, 
+                        output_tr.em_brake_o
+                    }
+                }
 
                 // verificare incalzire auxiliara turbina
-                if(input_tr.temp_value_i < HEAT_EN_TEMP) begin
+                if(input_tr.temp_value_i < HEAT_EN_TEMP) begin // de ce ar trebui sa se activeze iesirea de caldura
                     expected_heat_state = 1;
                     if(output_tr.heat_o) 
                         pass("heat_o", expected_heat_state);
@@ -111,7 +121,7 @@ class scoreboard;
                 end
 
                 // verificare comanda nacela
-                if(input_tr.wind_dir_i > YAW_MAX_POS) begin
+                if(input_tr.wind_dir_i > YAW_MAX_POS) begin // daca directia din care bate vantul este mai mare de 720 () ...
                     if(input_tr.yaw_angle_i > YAW_MAX_POS) begin
                         if(output_tr.yaw_pos_o == 0)
                             pass("yaw_pos_o", 0);
@@ -135,7 +145,7 @@ class scoreboard;
                 end
 
                 // verificam franarea de urgenta
-                if(input_tr.rpm_value_i >= MAX_RPM) begin
+                if(input_tr.rpm_value_i >= MAX_RPM) begin // daca se depaseste numarul maxim de rotatii pe minut, trebuie ca DUT-ul sa activeze franarea de urgenta
                     if(output_tr.em_brake_o) 
                         pass("em_brake_o", 1);
                     else                          
@@ -150,7 +160,7 @@ class scoreboard;
 
                 // verificare comanda pozitie pale
                 if(input_tr.rpm_value_i >= MAX_RPM || input_tr.wind_speed_i > MAX_WIND) begin
-                    // verificam daca palele s-au dus la pozitia de 90 de grade
+                    // verificam daca turatia rotorului a depasit RPM-ul admis sau daca palele s-au dus la pozitia de 90 de grade cand viteza vantului a depasit valoarea maxima admisa
                     if(output_tr.blade_pos_o == 180) 
                         pass("blade_pos_o", 180);
                     else                             
@@ -173,22 +183,21 @@ class scoreboard;
                 end        
             end
 
-            // thread pentru scoreboard
+            // thread pentru verificarea tranzactiilor APB
             forever begin
-                server_mon2scb.get(server_tr);                
+                server_mon2scb.get(server_tr);   
 
+                // Asamblam datele primite in 3 transferuri consecutive
                 apb_trans_data[apb_trans_count*32 +: 32] = server_tr.data;
                 apb_trans_count++;
 
                 if (apb_trans_count == 3) begin
                     $display("[SCB-INFO] Data sent through APB interface: %h", apb_trans_data);
                     if(apb_trans_data == sensors_data) begin
-                        // inlocuim functia pass 
-                        $display("[SCB-PASS] pwdata :: Expected = %h - Actual = %h", sensors_data, apb_trans_data);
+                        $display("[SCB-PASS] pwdata :: Expected = %h - Actual = %h", expected_apb_data, apb_trans_data);
                         pass_cnt++;
                     end else begin
-                        // inlocuim functia err
-                        $error("[SCB-FAIL] pwdata :: Expected = %h - Actual = %h", sensors_data, apb_trans_data);
+                        $error("[SCB-FAIL] pwdata :: Expected = %h - Actual = %h", expected_apb_data, apb_trans_data);
                         err_cnt++;
                     end
                     apb_trans_count = 0; // resetam counter-ul

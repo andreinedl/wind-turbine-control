@@ -12,14 +12,14 @@ class server_driver;
   int no_transactions;
   
   //creating virtual interface handle
-  virtual svr_interface svr_vif;
+  virtual server_interface svr_vif;
   
   //se creaza portul prin care driverul primeste datele la nivel abstract de la DUT
   //creating mailbox handle
   mailbox gen2driv;
   
   //constructor
-  function new(virtual svr_interface svr_vif,mailbox gen2driv);
+  function new(virtual server_interface svr_vif,mailbox gen2driv);
     //cand se creaza driverul, interfata pe care acesta trimite datele este conectata la interfata reala a DUT-ului
     //getting the interface
     this.svr_vif = svr_vif;
@@ -49,9 +49,9 @@ class server_driver;
      wait(`SVR_DRIV_IF.psel && !`SVR_DRIV_IF.penable);//astept primul tact al unei tranzactii APB
       $display("--------- [DRIVER-TRANSFER: %0d] ---------",no_transactions);
       @(posedge svr_vif.clk_i);
-        `SVR_DRIV_IF.pready    = 1;
+        `SVR_DRIV_IF.pready    <= 1;
       @(posedge svr_vif.clk_i);
-        `SVR_DRIV_IF.pready    = 0;
+        `SVR_DRIV_IF.pready    <= 0;
       $display("-----------------------------------------");
       no_transactions++;
   endtask
