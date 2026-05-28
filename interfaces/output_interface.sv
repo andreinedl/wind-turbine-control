@@ -1,12 +1,12 @@
 interface output_interface(input logic clk_i, rst_ni);
   // Semnale Comenzi emise de DUT 
-  logic [7:0]  blade_pos_o;       // 8 biți: Comandă orientare pale (0-180)
+  logic [7:0]  blade_pos_o;       // 8 biți: Comandă orientare unghi pale (0-180)
   logic [9:0]  yaw_pos_o;         // 10 biți: Comandă orientare nacelă (0-720)
   logic        heat_o;            // 1 bit: Comandă activare/dezactivare încălzire
   logic        em_brake_o;        // 1 bit: Comandă activare frână de urgență
   logic [3:0]  error_feedback_o;  // 4 biți: Coduri eroare (rotație, nacelă, încălzire)
 
-  // Clocking block pentru Monitorizarea ieșirilor
+  // Clocking Block pentru monitorizarea ieșirilor
   clocking monitor_cb @(posedge clk_i);
     default input #1 output #1;
     input blade_pos_o, yaw_pos_o, heat_o, em_brake_o, error_feedback_o;
