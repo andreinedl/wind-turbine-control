@@ -74,7 +74,7 @@ class input_driver;
         end
         //Thread-2: Calling drive task
         begin
-          //transmiterea datelor se face permanent, dar este conditionta de primirea datelor de la monitor.
+          //transmiterea datelor se face permanent, dar este conditionata de primirea datelor de la monitor.
           forever
             drive();
         end

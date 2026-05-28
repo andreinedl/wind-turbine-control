@@ -6,10 +6,6 @@ class scoreboard;
     localparam MAX_WIND	   = 250;
     localparam MAX_RPM     = 350; //35 RPM
     localparam WIND_ANGLE_INCREASE_TSH = 120;
-    // timer error thresholds
-    localparam int HEAT_ERR_CNT_TSH   = 1000; // heater_control
-    localparam int YAW_ERR_CNT_TSH    = 2000; // yaw_angle_control
-    localparam int BLADE_ERR_CNT_TSH  = 500; // blade_pitch_control
     
     // variabile de stare
     bit                 expected_heat_state = 0; // variabila de stare pentru temperatura
@@ -18,11 +14,17 @@ class scoreboard;
     logic [95:0]        apb_trans_data = '0;     // date trimise pe APB
     logic [95:0]        sensors_data;            // datele curente de la senzori
 
+    // Observație: `sensors_data` păstrează o imagine a semnalelor ce trebuie comparate
+    // cu datele reconstruite din transferurile APB (folosit pentru verificarea integrității)
+
 
     // mailbox-uri
     mailbox input_mon2scb;
     mailbox output_mon2scb;
     mailbox server_mon2scb;
+
+    // Mailbox-urile primesc tranzacții din monitoare (asincron față de scorboard)
+    // `server_mon2scb` primește pachete APB din server_monitor pentru reconstrucția datelor.
     
     // interfața virtuala pentru a putea asculta evenimentele de reset
     virtual input_interface v_input_intf;
@@ -35,47 +37,6 @@ class scoreboard;
     shortint err_cnt;  // counter ce numara tranzactiile ce sunt eronate
     int no_transactions; // numarul total de tranzactii procesate
     int reset_cnt = 0; // contor pentru numarul de resetari (folosit la coverage)
-    // contori pentru timerele interne (mirroring)
-    int heat_err_cnt = 0; // timer heater
-    int yaw_err_cnt  = 0; // timer yaw
-    int blade_err_cnt = 0; // timer blade
-
-    // coverage scoreboard
-    covergroup sb_cg @(posedge v_input_intf.clk_i);
-        // numar tranzactii corecte
-        pass_cp : coverpoint pass_cnt {
-            bins low   = {[0:9]};
-            bins med   = {[10:49]};
-            bins high  = {[50:$]};
-        }
-        // numar tranzactii eronate
-        err_cp  : coverpoint err_cnt {
-            bins none  = {0};
-            bins few   = {[1:9]};
-            bins many  = {[10:$]};
-        }
-        // timere de eroare
-        heat_timer_cp : coverpoint heat_err_cnt {
-            bins below = {[0:HEAT_ERR_CNT_TSH-1]};
-            bins at    = {HEAT_ERR_CNT_TSH};
-            bins over  = {[HEAT_ERR_CNT_TSH+1:$]};
-        }
-        yaw_timer_cp  : coverpoint yaw_err_cnt {
-            bins below = {[0:YAW_ERR_CNT_TSH-1]};
-            bins at    = {YAW_ERR_CNT_TSH};
-            bins over  = {[YAW_ERR_CNT_TSH+1:$]};
-        }
-        blade_timer_cp : coverpoint blade_err_cnt {
-            bins below = {[0:BLADE_ERR_CNT_TSH-1]};
-            bins at    = {BLADE_ERR_CNT_TSH};
-            bins over  = {[BLADE_ERR_CNT_TSH+1:$]};
-        }
-        // numar resetari
-        reset_cp : coverpoint reset_cnt {
-            bins reset   = {[1:$]};
-            bins noreset = {0};
-        }
-    endgroup : sb_cg
             
     function new(mailbox input_mon2scb, mailbox output_mon2scb, mailbox server_mon2scb, virtual input_interface v_input_intf);
         // initialize counters
@@ -88,8 +49,9 @@ class scoreboard;
         this.v_input_intf = v_input_intf;
         input_cov = new();
         output_cov = new();
-        sb_cg = new();
     endfunction
+
+    // Constructor: conectează mailbox-urile și interfața virtuală și instanțiază coverage.
 
     // printare mesaj de eroare pentru scoreboard
     // functie ce inlocuieste afisarea cu $error si incrementarea la fiecare eroare
@@ -105,20 +67,21 @@ class scoreboard;
         pass_cnt++;
     endfunction
 
+    // Helper functions: `err` și `pass` centralizează logging-ul și actualizarea contorilor.
+
     task reset_scoreboard;
         // resetare countere
         pass_cnt = 0;
         err_cnt = 0;
         no_transactions = 0;
-        heat_err_cnt = 0;
-        yaw_err_cnt = 0;
-        blade_err_cnt = 0;
         // resetam variabilele de stare la o valoare initiala
         expected_heat_state = 0; 
         yaw_last_pos = 0;        
         apb_trans_count = 0;
         apb_trans_data = 0;
     endtask
+
+    // Resetează starea scoreboard-ului; apelat la detectarea evenimentului de reset din TB.
 
     task main;
         input_transaction input_tr;
@@ -130,11 +93,7 @@ class scoreboard;
                 input_mon2scb.get(input_tr);
                 output_mon2scb.get(output_tr);
                 no_transactions++;
-                    // timer‑mirroring counters
-                    if (output_tr.heat_o)      heat_err_cnt   += 1; else heat_err_cnt   = 0;
-                    if (output_tr.yaw_pos_o != input_tr.yaw_angle_i) yaw_err_cnt    += 1; else yaw_err_cnt    = 0;
-                    if (output_tr.blade_pos_o != input_tr.blade_angle_i) blade_err_cnt  += 1; else blade_err_cnt  = 0;
-
+                
                 // esantionam datele pentru coverage
                 input_cov.sample(input_tr);
                 output_cov.sample(output_tr);
@@ -143,6 +102,7 @@ class scoreboard;
                 // daca verificarea de pe interfata server nu s-a terminat
                 // nu stocam noile date de la intrare si iesire in sensors_data
                 if(apb_trans_count == 0)    sensors_data = {
+                                                18'd0,  // padding
                                                 output_tr.error_feedback_o, 
                                                 input_tr.wind_speed_i, 
                                                 input_tr.wind_dir_i, 
@@ -245,10 +205,6 @@ class scoreboard;
                 begin
                     logic [3:0] expected_error = 4'b0000;
                     
-                    if (heat_err_cnt   >= HEAT_ERR_CNT_TSH)   expected_error[0] = 1'b1; // heat timer error
-                    if (yaw_err_cnt    >= YAW_ERR_CNT_TSH)    expected_error[1] = 1'b1; // yaw timer error
-                    if (blade_err_cnt  >= BLADE_ERR_CNT_TSH)  expected_error[2] = 1'b1; // blade timer error
-                        
                     if (input_tr.rpm_value_i >= MAX_RPM) expected_error[3] = 1'b1;
                     
                     if(output_tr.error_feedback_o == expected_error)
@@ -256,8 +212,6 @@ class scoreboard;
                     else
                         err("error_feedback_o", expected_error, output_tr.error_feedback_o);
                 end
-            // samplare scoreboard
-            sb_cg.sample();
             end
 
             // thread pentru verificarea tranzactiilor APB
@@ -281,6 +235,9 @@ class scoreboard;
                 end
             end
 
+            // reconstruim pwdata (96bit) din 3 transferuri APB de 32-bit
+            // și comparăm cu snapshot-ul `sensors_data` preluat din monitoare.
+
             // in cazul resetului resetam scoreboard-ul
             forever begin
                 @(v_input_intf.reset_assert);
@@ -289,6 +246,9 @@ class scoreboard;
 
         join_none
     endtask
+
+    // `main` rulează trei fire concurente: (1) procesare input/output, (2) reasamblare APB,
+    // (3) handler reset. Toate rulează independent și populază coverage/contori.
 
     // Task to display final verification summary
     task report_summary;

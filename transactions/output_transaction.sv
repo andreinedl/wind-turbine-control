@@ -12,9 +12,8 @@ class output_transaction;
   rand bit          em_brake_o;
   rand bit [3:0]    error_feedback_o;
   
-  //constrangerile reprezinta un tip de membru al claselor din SystemVerilog, pe langa atribute si metode
-  //aceasta constrangere specifica faptul ca se executa fie o scriere, fie o citire
-  //constrangerile sunt aplicate de catre compilator atunci cand atributele clasei primesc valori aleatoare in urma folosirii functiei randomize
+  // Constrangerile asigura ca, daca folosim randomizarea pe acest obiect, 
+  // valorile generate se vor incadra in limitele DUT-ului
   constraint blade_pos_c { 
     blade_pos_o inside {[0:180]}; // 180 = 90 de grade
   }
@@ -40,6 +39,7 @@ class output_transaction;
   endfunction
   
   //operator de copiere a unui obiect intr-un alt obiect (deep copy)
+  //cand trimitem un obiect printr-un mailbox, trimitem de fapt un pointer
   function output_transaction do_copy();
     output_transaction output_trans;
     output_trans = new();

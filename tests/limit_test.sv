@@ -9,10 +9,14 @@ program limit_test (
 	server_interface 	server_intf
 );
 
+
+// mostenim clasa input_transaction
 class illegal_values_trans extends input_transaction;
 	
+	// suprascriem functia pre_randomize
+	// folosind .constraint_mode(0), dezactivam constrangerile originale
 	function void pre_randomize();		//randomizarea este implicit activata
-		this.wind_dir_c		.constraint_mode(0);
+		this.wind_dir_c		.constraint_mode(0); 
 		this.wind_speed_c	.constraint_mode(0);
 		this.temp_c			.constraint_mode(0);
 		this.rpm_c			.constraint_mode(0);
@@ -20,6 +24,8 @@ class illegal_values_trans extends input_transaction;
 		this.yaw_angle_c	.constraint_mode(0);
 	endfunction
 	
+	// Definim noi constrangeri pentru a forta valorile senzorilor in afara limitelor acceptate de DUT.
+	// Acest lucru asigura ca DUT-ul limiteaza comanda sau nu are un comportament impredictibil.
 	constraint wind_dir_limit_c {
 		wind_dir_i > 720;				// Zona interzisa: 720-1023
 	}
@@ -51,9 +57,11 @@ illegal_values_trans illegal_trans;
 
 initial begin
 	$display("==== TEST VALORI INTERZISE ====");
+	// Instantierea mediului de testare si conectarea interfetelor virtuale la acesta
 	env = new(input_intf, output_intf, server_intf);
 	illegal_trans = new();
 	
+	// Inlocuim tranzactia generatorului cu tranzactia mostenita
 	env.gen.trans = illegal_trans;
 	env.gen.repeat_count = 50;
 	

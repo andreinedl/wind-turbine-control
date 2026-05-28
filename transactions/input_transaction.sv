@@ -6,7 +6,10 @@ class input_transaction;
   rand bit [7:0]  blade_angle_i;
   rand bit [9:0]  yaw_angle_i;
   
-  // directia vantului: 0 - 720 (0 - 360 grade) (precizie 0,5 grade)
+
+// constrangeri ce asigura valori permise la intrarea DUT-ului
+
+// directia vantului: 0 - 720 (0 - 360 grade) (precizie 0.5 grade)
 constraint wind_dir_c {
   wind_dir_i inside {[0:720]};
 }
@@ -36,7 +39,8 @@ constraint yaw_angle_c {
   yaw_angle_i inside {[0:720]};
 }
   
- 
+  //aceasta functie este apelata dupa aplicarea functiei randomize() asupra obiectelor apartinand acestei clase
+  //aceasta functie afiseaza valorile aleatorizate ale atributelor clasei
   function void post_randomize();
   $display("--------- [Trans] post_randomize ------");
 
@@ -51,6 +55,7 @@ constraint yaw_angle_c {
 endfunction
   
   //operator de copiere a unui obiect intr-un alt obiect (deep copy)
+  //cand trimitem un obiect printr-un mailbox, trimitem de fapt un pointer
   function input_transaction do_copy();
     input_transaction input_trans;
     input_trans = new();

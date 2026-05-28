@@ -11,6 +11,7 @@ class server_transaction;
 	endfunction
 	
 	// Functie pentru crearea unei copii independente a tranzactiei curente
+ 	//cand trimitem un obiect printr-un mailbox, trimitem de fapt un pointer
 	function server_transaction do_copy();
 		server_transaction server_trans = new();
 		server_trans.data = this.data;

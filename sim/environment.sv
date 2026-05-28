@@ -106,7 +106,9 @@ class environment;
 		join_any
 	endtask
 	
-	//Task care asteapta finalizarea testului
+	// Task care asigura o incheiere curata a simularii (Drain Time)
+	// Asteapta ca toate tranzactiile generate sa fie procesate atat de driver
+	// cat si evaluate de scoreboard inainte de a incheia testul.
 	task post_test();
 		wait(gen_ended.triggered);
 		wait(gen.repeat_count == input_driver.no_transactions);

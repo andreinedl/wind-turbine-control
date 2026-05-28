@@ -13,7 +13,7 @@ program simple_test(
   environment env;
   
   initial begin
-    //creating environment
+    // Instantierea mediului de testare si conectarea interfetelor virtuale la acesta
     env = new(input_intf, output_intf, server_intf);
     
     //setting the repeat count of generator as 4, means to generate 4 packets
