@@ -1,8 +1,8 @@
 //-------------------------------------------------------------------------
 //						www.verificationguide.com
 //-------------------------------------------------------------------------
-//driverul preia datele de la generator, la nivel abstract, si le trimite DUT-ului conform protocolului de comunicatie pe interfata respectiva
-//gets the packet from generator and drive the transaction packet items into interface (interface is connected to DUT, so the items driven into interface signal will get driven in to DUT) 
+//Acest driver actioneaza ca un APB Slave (Server reactiv).
+//Monitorizeaza interfata si cand Master-ul (DUT) initiaza o tranzactie (psel=1), raspunde cu pready=1.
 
 //se declara macro-ul SVR_DRIV_IF care va reprezenta interfata pe care driverul va trimite date DUT-ului
 `define SVR_DRIV_IF svr_vif.driver_cb
@@ -14,17 +14,11 @@ class server_driver;
   //creating virtual interface handle
   virtual server_interface svr_vif;
   
-  //se creaza portul prin care driverul primeste datele la nivel abstract de la DUT
-  //creating mailbox handle
-  mailbox gen2driv;
-  
   //constructor
-  function new(virtual server_interface svr_vif,mailbox gen2driv);
+  function new(virtual server_interface svr_vif);
     //cand se creaza driverul, interfata pe care acesta trimite datele este conectata la interfata reala a DUT-ului
     //getting the interface
     this.svr_vif = svr_vif;
-    //getting the mailbox handles from  environment 
-    this.gen2driv = gen2driv;
   endfunction
   
   //Reset task, Reset the Interface signals to default/initial values
@@ -40,14 +34,12 @@ class server_driver;
   
   //drives the transaction items to interface signals
   task drive;
-    server_transaction trans;
-      
     //se asteapta ca modulul sa iasa din reset
     wait(svr_vif.rst_ni); // reset activ in 0
     
-    //daca nu are date de la generator, driverul ramane cu executia la linia de mai jos, pana cand primeste respectivele date
+    //Driverul ramane in asteptare pana cand primeste o cerere de la master-ul APB (DUT-ul)
      wait(`SVR_DRIV_IF.psel && !`SVR_DRIV_IF.penable);//astept primul tact al unei tranzactii APB
-      $display("--------- [DRIVER-TRANSFER: %0d] ---------",no_transactions);
+      $display("--------- [SERVER DRIVER-TRANSFER: %0d] ---------",no_transactions);
       @(posedge svr_vif.clk_i);
         `SVR_DRIV_IF.pready    <= 1;
       @(posedge svr_vif.clk_i);
@@ -67,7 +59,7 @@ class server_driver;
         end
         //Thread-2: Calling drive task
         begin
-          //transmiterea datelor se face permanent, dar este conditionta de primirea datelor de la monitor.
+          //Asteapta si raspunde la cererile APB intr-o bucla continua
           forever
             drive();
         end

@@ -69,7 +69,7 @@ class environment;
 		
 		gen = new(gen2driv, gen_ended);
 		input_driver = new(input_vif, gen2driv);
-		server_driver = new(svr_vif, gen2driv);
+		server_driver = new(svr_vif);
 		
 		i_mon = new(input_vif, i_mon2scb);
 		o_mon = new(output_vif, o_mon2scb);
