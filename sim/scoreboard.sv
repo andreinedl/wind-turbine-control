@@ -7,6 +7,16 @@ class scoreboard;
     localparam MAX_RPM     = 350; //35 RPM
     localparam WIND_ANGLE_INCREASE_TSH = 120;
     
+    // Parametri de timp și praguri (thresholds) preluate din DUT
+    localparam CLK_PERIOD_NS = 20;
+    localparam YAW_COUNTER_SEC = 60;
+    localparam HEAT_COUNTER_SEC = 300;
+    localparam BLADE_COUNTER_SEC = 30;
+    // 1_000_000_000 = 1s in ns
+    localparam longint YAW_ERR_CNT_TSH   = (64'd1_000_000_000 * YAW_COUNTER_SEC) / CLK_PERIOD_NS;
+    localparam longint HEAT_ERR_CNT_TSH  = (64'd1_000_000_000 * HEAT_COUNTER_SEC) / CLK_PERIOD_NS;
+    localparam longint BLADE_ERR_CNT_TSH = (64'd1_000_000_000 * BLADE_COUNTER_SEC) / CLK_PERIOD_NS;
+
     // variabile de stare
     bit                 expected_heat_state = 0; // variabila de stare pentru temperatura
     int                 yaw_last_pos = 0;        // variabila de stare pentru pozitia nacelei
@@ -14,9 +24,10 @@ class scoreboard;
     logic [95:0]        apb_trans_data = '0;     // date trimise pe APB
     logic [95:0]        sensors_data;            // datele curente de la senzori
 
-    // Observație: `sensors_data` păstrează o imagine a semnalelor ce trebuie comparate
-    // cu datele reconstruite din transferurile APB (folosit pentru verificarea integrității)
-
+    // Countere pentru erorile de timeout
+    longint             yaw_err_cnt = 0;
+    longint             blade_err_cnt = 0;
+    longint             heat_err_cnt = 0;
 
     // mailbox-uri
     mailbox input_mon2scb;
@@ -67,8 +78,6 @@ class scoreboard;
         pass_cnt++;
     endfunction
 
-    // Helper functions: `err` și `pass` centralizează logging-ul și actualizarea contorilor.
-
     task reset_scoreboard;
         // resetare countere
         pass_cnt = 0;
@@ -79,6 +88,9 @@ class scoreboard;
         yaw_last_pos = 0;        
         apb_trans_count = 0;
         apb_trans_data = 0;
+        yaw_err_cnt = 0;
+        blade_err_cnt = 0;
+        heat_err_cnt = 0;
     endtask
 
     // Resetează starea scoreboard-ului; apelat la detectarea evenimentului de reset din TB.
@@ -201,12 +213,46 @@ class scoreboard;
                         err("blade_pos_o", 0, output_tr.blade_pos_o);
                 end        
 
+                // countere timeout
+                
+                // Timeout nacela
+                // daca intr un anumit timp pozitia nacelei nu ajunge la cea data de DUT
+                // semnalam eroarea
+                if (input_tr.yaw_angle_i != output_tr.yaw_pos_o) begin
+                    if (yaw_err_cnt < YAW_ERR_CNT_TSH) yaw_err_cnt++;
+                end else begin
+                    yaw_err_cnt = 0;
+                end
+                
+                // timeout pale
+                // daca intr un anumit timp pozitia palelor nu ajunge la cea data de DUT
+                // semnalam eroarea
+                if (input_tr.blade_angle_i != output_tr.blade_pos_o) begin
+                    if (blade_err_cnt < BLADE_ERR_CNT_TSH) blade_err_cnt++;
+                end else begin
+                    blade_err_cnt = 0;
+                end
+                
+                // timeout heat
+                // daca caldura e pornita si temperatura este sub pragul de dezactivare
+                // iar intr un anumit timp nu ajunge la acel prag, atunci vom semnala eroarea
+                if (output_tr.heat_o == 1'b1 && input_tr.temp_value_i < HEAT_DIS_TEMP) begin
+                    if (heat_err_cnt < HEAT_ERR_CNT_TSH) heat_err_cnt++;
+                end else begin
+                    heat_err_cnt = 0;
+                end
+
                 // verificare error_feedback_o
                 begin
                     logic [3:0] expected_error = 4'b0000;
                     
+                    //verificam daca counterele pentru conditii au ajuns la threshold
+                    //iar daca da, atunci semnalam ca avem eroare
                     if (input_tr.rpm_value_i >= MAX_RPM) expected_error[3] = 1'b1;
-                    
+                    if (blade_err_cnt == BLADE_ERR_CNT_TSH) expected_error[2] = 1'b1;
+                    if (yaw_err_cnt == YAW_ERR_CNT_TSH) expected_error[1] = 1'b1;
+                    if (heat_err_cnt == HEAT_ERR_CNT_TSH) expected_error[0] = 1'b1;
+
                     if(output_tr.error_feedback_o == expected_error)
                         pass("error_feedback_o", expected_error);
                     else
