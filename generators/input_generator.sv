@@ -35,6 +35,9 @@ class input_generator;
     -> ended; 
   endtask
   
+
+  //task pentru a genera o tranzactie cu valori specifice
+  //permite verificarea unor scenarii particulare fara randomizare completa
   task generate_single_transaction(  
     bit [9:0] wind_dir    = 10'd120,
     bit [9:0] wind_speed  = 10'd100,
