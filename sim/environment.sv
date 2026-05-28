@@ -62,22 +62,28 @@ class environment;
 		this.output_vif = output_vif;
 		this.svr_vif 	= svr_vif;
 		
-		gen2driv 	= new();
+		gen2driv 	= new();		//Crearea obiectului mailbox generator -> driver
 		i_mon2scb 	= new();
 		o_mon2scb	= new();
-		s_mon2scb	= new();
+		s_mon2scb	= new();		//Crearea obiectelor mailbox de la - input_monitor	}
+									//								   - output_monitor } -> scoreboard
+									//								   - server_monitor	}
 		
+		//Instantierea generatorului si a driverelor
 		gen = new(gen2driv, gen_ended);
 		input_driver = new(input_vif, gen2driv);
 		server_driver = new(svr_vif);
 		
+		//Instantierea monitoarelor
 		i_mon = new(input_vif, i_mon2scb);
 		o_mon = new(output_vif, o_mon2scb);
 		s_mon = new(svr_vif, s_mon2scb);
-
+		
+		//Instantierea scoreboardului
 		scb = new(i_mon2scb, o_mon2scb, s_mon2scb, input_vif);
 	endfunction
 	
+	//Task care se ocupa cu resetarea driverelor inainte de test
 	task pre_test();
 		fork
 			input_driver.reset();
@@ -85,6 +91,7 @@ class environment;
 		join
 	endtask
 	
+	//Task care se ocupa cu apelarea functiei main() a elementelor mediului de verificare la rularea testului
 	task test();
 		fork
 		gen.main();
@@ -95,11 +102,11 @@ class environment;
 		o_mon.main();
 		s_mon.main();
 
-		//rulare scoreboard
 		scb.main();
 		join_any
 	endtask
 	
+	//Task care asteapta finalizarea testului
 	task post_test();
 		wait(gen_ended.triggered);
 		wait(gen.repeat_count == input_driver.no_transactions);
@@ -107,14 +114,15 @@ class environment;
 		#400;
 	endtask
 	
+	//Functie care se ocupa cu afisarea rapoartelor de coverage
 	function report();
 		scb.input_cov.print_coverage();
 		scb.output_cov.print_coverage();
 	endfunction
 	
+	//Task care ruleaza fluxul principal de taskuri
 	task run;
 		pre_test();
-		//$stop;
 		test();
 		post_test();
 		report();
