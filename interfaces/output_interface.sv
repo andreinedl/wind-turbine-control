@@ -1,5 +1,5 @@
 interface output_interface(input logic clk_i, rst_ni);
-  // Semnale Comenzi emise de DUT (Design Under Test)
+  // Semnale Comenzi emise de DUT 
   logic [7:0]  blade_pos_o;       // 8 biți: Comandă orientare pale (0-180)
   logic [9:0]  yaw_pos_o;         // 10 biți: Comandă orientare nacelă (0-720)
   logic        heat_o;            // 1 bit: Comandă activare/dezactivare încălzire

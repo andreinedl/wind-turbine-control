@@ -1,5 +1,4 @@
 interface server_interface(input logic clk_i, rst_ni);
- 
    // Semnale APB conduse de Master
   logic        paddr;
   logic        psel;    
